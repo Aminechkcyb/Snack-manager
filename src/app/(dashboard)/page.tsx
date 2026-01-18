@@ -13,7 +13,8 @@ import {
   ChevronDown,
   History,
   X,
-  PlusCircle
+  PlusCircle,
+  Bell
 } from "lucide-react";
 import { cn, formatPrice } from "@/lib/utils";
 import { useOrders } from "@/hooks/useOrders";
@@ -22,7 +23,7 @@ import { NewOrderModal } from "@/components/NewOrderModal";
 import { useAppSettings } from "@/contexts/SettingsContext";
 
 export default function Dashboard() {
-  const { orders, activeOrders, updateOrderStatus, getClientHistory, addOrder } = useOrders();
+  const { orders, activeOrders, updateOrderStatus, getClientHistory, addOrder, playNotificationSound } = useOrders();
   const [isNewOrderOpen, setIsNewOrderOpen] = useState(false);
   const { currentTheme } = useAppSettings();
 
@@ -50,18 +51,48 @@ export default function Dashboard() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex flex-col gap-1">
           <h1 className="text-3xl font-bold text-slate-900">Tableau de bord</h1>
-          <p className="text-slate-500">Gérez vos commandes en temps réel</p>
+          <p className="text-slate-500 font-medium flex items-center gap-2">
+            <span className="capitalize">
+              {new Date().toLocaleDateString("fr-FR", { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+            </span>
+            • Gérez vos commandes en temps réel
+          </p>
         </div>
-        <button
-          onClick={() => setIsNewOrderOpen(true)}
-          className={cn(
-            "flex items-center gap-2 text-white px-5 py-2.5 rounded-xl font-bold shadow-lg hover:opacity-90 transition-all",
-            `bg-gradient-to-r ${currentTheme.gradient} shadow-${currentTheme.ringColor}/25`
-          )}
-        >
-          <PlusCircle className="h-5 w-5" />
-          Nouvelle Commande
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={async () => {
+              // Trigger sound explicitly for testing
+              await playNotificationSound();
+
+              const now = new Date();
+              addOrder({
+                id: `sim-${Date.now()}`,
+                customerName: "TEST ALERT",
+                phoneNumber: "06 00 00 00 00",
+                items: [{ name: "🔔 Test Sonore", quantity: 1 }],
+                totalPrice: 0,
+                status: "nouveau",
+                type: "emporter",
+                timestamp: now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+                date: "18 Jan 2026"
+              });
+            }}
+            className="flex items-center gap-2 text-slate-600 bg-white border border-slate-200 px-4 py-2.5 rounded-xl font-bold hover:bg-slate-50 transition-all shadow-sm active:scale-95"
+          >
+            <Bell className="h-5 w-5" />
+            Test Son (Toucher d'abord)
+          </button>
+          <button
+            onClick={() => setIsNewOrderOpen(true)}
+            className={cn(
+              "flex items-center gap-2 text-white px-5 py-2.5 rounded-xl font-bold shadow-lg hover:opacity-90 transition-all",
+              `bg-gradient-to-r ${currentTheme.gradient} shadow-${currentTheme.ringColor}/25`
+            )}
+          >
+            <PlusCircle className="h-5 w-5" />
+            Nouvelle Commande
+          </button>
+        </div>
       </div>
 
       {/* KPI Section */}
@@ -140,57 +171,122 @@ export default function Dashboard() {
               Aucune commande en cours.
             </div>
           ) : (
-            activeOrders.map((order) => (
-              <div key={order.id} className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:bg-slate-50 transition-colors group">
-                <div className="flex gap-4">
-                  <div className={cn(
-                    "h-12 w-12 rounded-xl flex items-center justify-center shrink-0",
-                    order.type === "livraison" ? "bg-blue-50 text-blue-600" : "bg-orange-50 text-orange-600"
-                  )}>
-                    {order.type === "livraison" ? <Truck className="h-6 w-6" /> : <ShoppingBag className="h-6 w-6" />}
-                  </div>
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-slate-900">{order.customerName}</span>
-                      <StatusInfo status={order.status} />
+            activeOrders
+              .sort((a, b) => {
+                // Custom Date Parser for "18 Jan 2026" + "19:55"
+                const parseOrderDate = (o: Order) => {
+                  // Hacky parser for the specific format "DD MMM YYYY"
+                  // Ideally use dayjs or date-fns but native is fine if robust
+                  return new Date(`${o.date} ${o.timestamp}`);
+                };
+
+                const dateA = parseOrderDate(a);
+                const dateB = parseOrderDate(b);
+
+                const now = new Date();
+                // @ts-ignore
+                const waitA = (now - dateA) / (1000 * 60);
+                // @ts-ignore
+                const waitB = (now - dateB) / (1000 * 60);
+
+                const isPriorityA = waitA >= 15;
+                const isPriorityB = waitB >= 15;
+
+                // 1. Priority First
+                if (isPriorityA && !isPriorityB) return -1;
+                if (!isPriorityA && isPriorityB) return 1;
+
+                // 2. Then Longest Wait First (within same priority group)
+                return dateA.getTime() - dateB.getTime();
+              })
+              .map((order) => {
+                // Calculate wait time for display
+                const orderDate = new Date(`${order.date} ${order.timestamp}`);
+                const waitTime = Math.floor((new Date().getTime() - orderDate.getTime()) / (1000 * 60));
+                const isPriority = waitTime >= 15;
+
+                return (
+                  <div key={order.id} className={cn(
+                    "p-6 flex flex-col md:flex-row md:items-center justify-between gap-6 transition-all group border-l-[6px]",
+                    isPriority
+                      ? "bg-red-50 border-red-600 shadow-red-100 animate-pulse"
+                      : "hover:bg-slate-50 border-transparent"
+                  )}
+                    style={isPriority ? {
+                      animationDuration: '2s' // Slower pulse for better readability
+                    } : undefined}
+                  >
+                    <div className="flex gap-4">
+                      <div className={cn(
+                        "relative h-12 w-12 rounded-xl flex items-center justify-center shrink-0",
+                        isPriority ? "bg-red-100 text-red-600" :
+                          order.type === "livraison" ? "bg-blue-50 text-blue-600" : "bg-orange-50 text-orange-600"
+                      )}>
+                        {order.type === "livraison" ? <Truck className="h-6 w-6" /> : <ShoppingBag className="h-6 w-6" />}
+
+                        {isPriority && (
+                          <div
+                            className="absolute -top-3 -right-3 bg-red-600 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-full shadow-lg flex items-center gap-0.5 animate-bounce"
+                          >
+                            <span>🔥</span>
+                            <span>{waitTime}m</span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-slate-900">{order.customerName}</span>
+                          <StatusInfo status={order.status} />
+                          {isPriority && (
+                            <span
+                              className="text-xs font-bold px-2 py-0.5 rounded-full border bg-red-600 text-white border-red-700 animate-none"
+                            >
+                              URGENT
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-500">
+                          <span className="flex items-center gap-1.5"><Phone className="h-3.5 w-3.5" /> {order.phoneNumber}</span>
+                          <span className={cn("flex items-center gap-1.5 font-medium", isPriority ? "text-red-600 font-bold" : "")}>
+                            <Clock className="h-3.5 w-3.5" /> {order.timestamp}
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-500">
-                      <span className="flex items-center gap-1.5"><Phone className="h-3.5 w-3.5" /> {order.phoneNumber}</span>
-                      <span className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" /> {order.timestamp}</span>
+
+                    <div className="flex-1 max-w-md">
+                      <p className="text-sm font-medium text-slate-700">
+                        {order.items.map(i => `${i.quantity}x ${i.name}`).join(", ")}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center justify-between md:justify-end gap-4">
+                      <div className="text-right min-w-[80px]">
+                        <div className={cn("text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r", currentTheme.gradient)}>{formatPrice(order.totalPrice)}</div>
+                        <div className="text-xs text-slate-500 uppercase font-semibold">{order.type}</div>
+                      </div>
+
+                      <StatusSelect
+                        currentStatus={order.status}
+                        onStatusChange={(status) => updateOrderStatus(order.id, status)}
+                      />
                     </div>
                   </div>
-                </div>
-
-                <div className="flex-1 max-w-md">
-                  <p className="text-sm font-medium text-slate-700">
-                    {order.items.map(i => `${i.quantity}x ${i.name}`).join(", ")}
-                  </p>
-                </div>
-
-                <div className="flex items-center justify-between md:justify-end gap-4">
-                  <div className="text-right min-w-[80px]">
-                    <div className={cn("text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r", currentTheme.gradient)}>{formatPrice(order.totalPrice)}</div>
-                    <div className="text-xs text-slate-500 uppercase font-semibold">{order.type}</div>
-                  </div>
-
-                  <StatusSelect
-                    currentStatus={order.status}
-                    onStatusChange={(status) => updateOrderStatus(order.id, status)}
-                  />
-                </div>
-              </div>
-            ))
+                );
+              })
           )}
         </div>
       </div>
 
-      {isNewOrderOpen && (
-        <NewOrderModal
-          onClose={() => setIsNewOrderOpen(false)}
-          onSubmit={addOrder}
-        />
-      )}
-    </div>
+      {
+        isNewOrderOpen && (
+          <NewOrderModal
+            onClose={() => setIsNewOrderOpen(false)}
+            onSubmit={addOrder}
+          />
+        )
+      }
+    </div >
   );
 }
 

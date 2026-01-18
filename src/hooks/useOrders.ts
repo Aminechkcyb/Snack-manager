@@ -144,6 +144,77 @@ export function useOrders() {
         setIsLoaded(true);
     }, []);
 
+    // Sound Notification Logic (Robust Singleton Pattern + Speech)
+    const playNotificationSound = async () => {
+        // Strategy 1: Speech Synthesis (Backup for accessibility/mobile)
+        try {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance("Ding ! Nouvelle commande !");
+                utterance.rate = 1.1;
+                utterance.lang = 'fr-FR';
+                window.speechSynthesis.speak(utterance);
+            }
+        } catch (e) {
+            console.error("Speech error", e);
+        }
+
+        // Strategy 2: AudioContext (Primary Beep)
+        try {
+            // Use global context if available, otherwise create one
+            if (!(window as any).notificationAudioContext) {
+                const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+                if (AudioContext) {
+                    (window as any).notificationAudioContext = new AudioContext();
+                }
+            }
+
+            const ctx = (window as any).notificationAudioContext;
+            if (!ctx) {
+                console.error("❌ AudioContext not supported on this device.");
+                return;
+            }
+
+            // Always try to resume (fixes 'suspended' state on Chrome/Safari)
+            if (ctx.state === 'suspended') {
+                await ctx.resume();
+            }
+
+            // OSCILLATOR 1 (Main Tone - Ding)
+            const osc1 = ctx.createOscillator();
+            const gain1 = ctx.createGain();
+            osc1.connect(gain1);
+            gain1.connect(ctx.destination);
+
+            osc1.type = 'square'; // Aggressive/Loud wave type (Gameboy style) to be sure it's heard
+            osc1.frequency.setValueAtTime(660, ctx.currentTime);
+            gain1.gain.setValueAtTime(0.2, ctx.currentTime); // Moderate gain for Square wave (it's naturally loud)
+            gain1.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
+
+            osc1.start(ctx.currentTime);
+            osc1.stop(ctx.currentTime + 0.6);
+
+            // OSCILLATOR 2 (Harmonic - Dong)
+            const osc2 = ctx.createOscillator();
+            const gain2 = ctx.createGain();
+            osc2.connect(gain2);
+            gain2.connect(ctx.destination);
+
+            osc2.type = 'square';
+            osc2.frequency.setValueAtTime(520, ctx.currentTime + 0.15);
+            gain2.gain.setValueAtTime(0.2, ctx.currentTime + 0.15);
+            gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.2);
+
+            osc2.start(ctx.currentTime + 0.15);
+            osc2.stop(ctx.currentTime + 1.2);
+
+            console.log("🔊 Playing Loud Notification (Square Wave)");
+        } catch (e) {
+            console.error("❌ Audio Error:", e);
+        }
+    };
+
+    // Better Approach: Trigger sound in addOrder directly. Much simpler and safer.
+
     const saveOrders = (newOrders: Order[]) => {
         setOrders(newOrders);
         localStorage.setItem("snackOrders_v2", JSON.stringify(newOrders));
@@ -174,6 +245,7 @@ export function useOrders() {
     const addOrder = (order: Order) => {
         const newOrders = [order, ...orders];
         saveOrders(newOrders);
+        playNotificationSound();
     };
 
     return {
@@ -183,6 +255,7 @@ export function useOrders() {
         updateOrderStatus,
         getClientHistory,
         addOrder,
-        isLoaded
+        isLoaded,
+        playNotificationSound
     };
 }
