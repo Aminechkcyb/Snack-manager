@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #ffffff;
+  --foreground: #0f172a;
+  --primary: #2563eb;
+  --primary-foreground: #ffffff;
+  --secondary: #f8fafc;
+  --secondary-foreground: #0f172a;
+  --accent: #eff6ff;
+  --border: #e2e8f0;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+@layer utilities {
+  .bg-gradient-primary {
+    @apply bg-gradient-to-br from-blue-600 to-cyan-500;
+  }
+
+  .text-gradient-primary {
+    @apply bg-gradient-to-br from-blue-600 to-cyan-500 bg-clip-text text-transparent;
+  }
+
+  .icon-gradient {
+    @apply text-blue-600;
+    /* Fallback */
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+}
