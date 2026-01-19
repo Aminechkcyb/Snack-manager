@@ -15,21 +15,21 @@ export default function DashboardLayout({
     return (
         <div className="flex h-screen bg-slate-50 overflow-hidden">
             {/* Desktop Sidebar */}
-            <div className="hidden xl:flex h-full">
+            <div className="hidden 2xl:flex h-full">
                 <Sidebar />
             </div>
 
             {/* Mobile Menu Overlay */}
             {isMobileMenuOpen && (
                 <div
-                    className="fixed inset-0 bg-slate-900/50 z-40 xl:hidden backdrop-blur-sm animate-in fade-in duration-200"
+                    className="fixed inset-0 bg-slate-900/50 z-40 2xl:hidden backdrop-blur-sm animate-in fade-in duration-200"
                     onClick={() => setIsMobileMenuOpen(false)}
                 />
             )}
 
             {/* Mobile Sidebar */}
             <div className={cn(
-                "fixed inset-y-0 left-0 z-50 w-64 bg-white transform transition-transform duration-300 ease-in-out xl:hidden shadow-2xl",
+                "fixed inset-y-0 left-0 z-50 w-64 bg-white transform transition-transform duration-300 ease-in-out 2xl:hidden shadow-2xl",
                 isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
             )}>
                 <div className="flex justify-end p-2 absolute right-0 top-0 z-50">
@@ -40,7 +40,7 @@ export default function DashboardLayout({
 
             <div className="flex-1 flex flex-col overflow-hidden">
                 {/* Mobile Header */}
-                <div className="xl:hidden flex items-center p-4 bg-white border-b shadow-sm shrink-0">
+                <div className="2xl:hidden flex items-center p-4 bg-white border-b shadow-sm shrink-0">
                     <button
                         onClick={() => setIsMobileMenuOpen(true)}
                         className="p-2 -ml-2 hover:bg-slate-100 rounded-lg transition-colors"
