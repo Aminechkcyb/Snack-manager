@@ -7,6 +7,7 @@ export interface AppSettings {
     logo: string | null;
     logoSize: number;
     loyaltyTarget: number; // Orders needed for 1 star
+    enableLoyalty: boolean;
 }
 
 const INITIAL_SETTINGS: AppSettings = {
@@ -15,7 +16,8 @@ const INITIAL_SETTINGS: AppSettings = {
     customColor: "#2563eb",
     logo: null,
     logoSize: 40,
-    loyaltyTarget: 10
+    loyaltyTarget: 10,
+    enableLoyalty: true
 };
 
 export const COLOR_THEMES = {

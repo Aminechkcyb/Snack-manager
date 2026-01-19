@@ -181,6 +181,76 @@ export default function StatsPage() {
         };
     }, [timeRange, filteredData]);
 
+    // Hourly Data Logic
+    const hourlyStats = useMemo(() => {
+        // Mock data for each day - Scaled closer to 1000 max as requested
+        const hourlyDataByDay = {
+            lun: [250, 450, 680, 550, 300, 150, 250, 400, 750, 600, 450, 300, 150, 60, 20, 10, 5],
+            mar: [300, 550, 750, 600, 350, 180, 280, 450, 850, 680, 550, 380, 200, 90, 30, 10, 5],
+            mer: [350, 600, 850, 680, 450, 250, 300, 550, 900, 750, 600, 450, 250, 120, 60, 20, 10],
+            jeu: [300, 550, 720, 580, 320, 180, 280, 480, 880, 720, 580, 420, 220, 100, 40, 10, 5],
+            ven: [450, 750, 900, 750, 550, 300, 450, 750, 1200, 1000, 900, 750, 550, 350, 250, 150, 60],
+            sam: [550, 900, 1000, 850, 600, 350, 550, 900, 1350, 1200, 1000, 850, 600, 450, 300, 180, 90],
+            dim: [450, 850, 950, 780, 550, 300, 450, 850, 1250, 1150, 950, 780, 550, 400, 280, 150, 60],
+        };
+
+        const hours = ["11h", "12h", "13h", "14h", "15h", "16h", "17h", "18h", "19h", "20h", "21h", "22h", "23h", "00h", "01h", "02h", "03h"];
+
+        // Aggregate data based on timeRange
+        const allDays = Object.values(hourlyDataByDay);
+        // Base weekly sum (sum of all days per hour)
+        const weeklySum = Array(17).fill(0).map((_, hourIdx) => {
+            return allDays.reduce((sum, dayData) => sum + dayData[hourIdx], 0);
+        });
+
+        let multiplier = 1;
+        // Logic: if week, we use the weeklySum (Total for the week)
+        // if month, approx 4.3 weeks
+        // if year, approx 52 weeks
+        // User wants to see total orders for the selected period
+
+        switch (timeRange) {
+            case "week": multiplier = 1; break;
+            case "month": multiplier = 4.3; break;
+            case "year": multiplier = 52; break;
+            case "custom": multiplier = 1; break; // Simplified for custom
+            default: multiplier = 1;
+        }
+
+        const currentData = weeklySum.map(val => Math.round(val * multiplier));
+
+        // Chart Data
+        const chartData = hours.map((hour, i) => ({
+            hour,
+            orders: currentData[i]
+        }));
+
+        // Summary Statistics
+        const maxOrders = Math.max(...currentData);
+        const indexMax = currentData.indexOf(maxOrders);
+        const peakHour = `${hours[indexMax]}-${indexMax + 1 < hours.length ? hours[indexMax + 1] : ''}`;
+
+        const minOrders = Math.min(...currentData.filter((n: number) => n > 0));
+        const indexMin = currentData.indexOf(minOrders);
+        const quietHour = `${hours[indexMin]}-${indexMin + 1 < hours.length ? hours[indexMin + 1] : ''}`;
+
+        const total = currentData.reduce((a: number, b: number) => a + b, 0);
+        // Average Basket roughly €22.50
+        const totalRevenue = total * 22.5;
+        const avg = (total / currentData.length).toFixed(1);
+
+        return {
+            chartData,
+            summary: {
+                peakHour,
+                maxOrders,
+                quietHour,
+                revenue: formatPrice(totalRevenue),
+                avg
+            }
+        };
+    }, [timeRange]);
+
     // Use usage of "hex" color for chart if available, otherwise fallback
     // We can use a simple approach: if theme is custom, use the variable string? No, Recharts needs hex strings mostly for some parts.
     // Recharts <stop color> accepts CSS variables like `var(--theme-color)`.
@@ -262,7 +332,7 @@ export default function StatsPage() {
                 {/* Revenue Chart */}
                 <div className="lg:col-span-2 bg-white p-6 rounded-2xl border shadow-sm space-y-6">
                     <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                        <h2 className="text-lg font-bold">Revenu</h2>
+                        <h2 className="text-lg font-bold text-slate-900">Revenu</h2>
                         <div className="flex bg-slate-100 p-1 rounded-xl">
                             {(['week', 'month', 'year', 'custom'] as const).map(range => (
                                 <button
@@ -285,21 +355,21 @@ export default function StatsPage() {
                     {timeRange === 'custom' && (
                         <div className="flex flex-wrap items-center gap-4 bg-slate-50 p-4 rounded-xl border animate-in slide-in-from-top-2">
                             <div className="flex flex-col gap-1">
-                                <label className="text-xs font-bold text-slate-500">Du</label>
+                                <label className="text-xs font-bold text-slate-900">Du</label>
                                 <input
                                     type="date"
                                     value={startDate}
                                     onChange={(e) => setStartDate(e.target.value)}
-                                    className="px-3 py-2 bg-white border rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-slate-200"
+                                    className="px-3 py-2 bg-white border rounded-lg text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-200"
                                 />
                             </div>
                             <div className="flex flex-col gap-1">
-                                <label className="text-xs font-bold text-slate-500">Au</label>
+                                <label className="text-xs font-bold text-slate-900">Au</label>
                                 <input
                                     type="date"
                                     value={endDate}
                                     onChange={(e) => setEndDate(e.target.value)}
-                                    className="px-3 py-2 bg-white border rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-slate-200"
+                                    className="px-3 py-2 bg-white border rounded-lg text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-200"
                                 />
                             </div>
                             <div className="flex-1 text-xs text-slate-400 italic pt-4">
@@ -358,7 +428,7 @@ export default function StatsPage() {
                                 <TrendingUp className="h-5 w-5" />
                             </div>
                             <div>
-                                <h2 className="font-bold text-slate-800">Top Ventes</h2>
+                                <h2 className="font-bold text-slate-900">Top Ventes</h2>
                                 <p className="text-xs text-slate-500 font-medium">Classement par volume</p>
                             </div>
                         </div>
@@ -443,7 +513,74 @@ export default function StatsPage() {
                     </div>
                 </div>
             </div>
+
+            {/* Hourly Orders Distribution */}
+            <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-6">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div>
+                        <h2 className="text-lg font-bold text-slate-900">Commandes par heure</h2>
+                        <p className="text-sm text-slate-500">Distribution sur {timeRange === 'week' ? 'la semaine' : timeRange === 'month' ? 'le mois' : timeRange === 'year' ? "l'année" : 'la période'}</p>
+                    </div>
+                    <div className="flex bg-slate-100 p-1 rounded-xl">
+                        {/* Day selector removed as per requirement to link with global timeRange */}
+                        <span className="text-xs font-bold text-slate-500 px-3 py-1.5">
+                            {timeRange === 'week' ? 'Semaine' : timeRange === 'month' ? 'Mensuel' : timeRange === 'year' ? 'Annuel' : 'Personnalisé'}
+                        </span>
+                    </div>
+                </div>
+
+                <div className="h-80 w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={hourlyStats.chartData}>
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                            <XAxis
+                                dataKey="hour"
+                                axisLine={false}
+                                tickLine={false}
+                                tick={{ fill: '#64748b', fontSize: 12 }}
+                                dy={10}
+                            />
+                            <YAxis
+                                axisLine={false}
+                                tickLine={false}
+                                tick={{ fill: '#64748b', fontSize: 12 }}
+                                tickFormatter={(value) => `${value}`}
+                            />
+                            <Tooltip
+                                contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                                formatter={(value: number | undefined) => [`${value || 0} commandes`, 'Total']}
+                            />
+                            <Bar
+                                dataKey="orders"
+                                fill={currentTheme.hex}
+                                radius={[8, 8, 0, 0]}
+                                animationDuration={500}
+                            />
+                        </BarChart>
+                    </ResponsiveContainer>
+                </div>
+
+                {/* Peak hours summary - Dynamically Calculated */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t">
+                    <div className="text-center p-3 bg-slate-50 rounded-lg animate-in fade-in zoom-in duration-300">
+                        <div className="text-xs text-slate-500 font-medium mb-1">Heure de pointe</div>
+                        <div className={cn("text-xl font-bold", currentTheme.solidText)}>{hourlyStats.summary.peakHour}</div>
+                    </div>
+                    <div className="text-center p-3 bg-slate-50 rounded-lg animate-in fade-in zoom-in duration-300 delay-75">
+                        <div className="text-xs text-slate-500 font-medium mb-1">Commandes max</div>
+                        <div className={cn("text-xl font-bold", currentTheme.solidText)}>{hourlyStats.summary.maxOrders}</div>
+                    </div>
+                    <div className="text-center p-3 bg-slate-50 rounded-lg animate-in fade-in zoom-in duration-300 delay-100">
+                        <div className="text-xs text-slate-500 font-medium mb-1">Revenu du jour</div>
+                        <div className="text-xl font-bold text-slate-600">{hourlyStats.summary.revenue}</div>
+                    </div>
+                    <div className="text-center p-3 bg-slate-50 rounded-lg animate-in fade-in zoom-in duration-300 delay-150">
+                        <div className="text-xs text-slate-500 font-medium mb-1">Moyenne/heure</div>
+                        <div className="text-xl font-bold text-slate-600">{hourlyStats.summary.avg}</div>
+                    </div>
+                </div>
+
+            </div>
         </div>
     );
 }
-

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import {
   Phone,
   User,
@@ -14,18 +15,28 @@ import {
   History,
   X,
   PlusCircle,
-  Bell
+  Bell,
+  Trash2,
+  Pencil,
+  Utensils,
+  StickyNote,
+  Printer
 } from "lucide-react";
 import { cn, formatPrice } from "@/lib/utils";
 import { useOrders } from "@/hooks/useOrders";
 import { Order, OrderStatus } from "@/lib/types";
 import { NewOrderModal } from "@/components/NewOrderModal";
+import { DeleteModal } from "@/components/DeleteModal";
 import { useAppSettings } from "@/contexts/SettingsContext";
+import { printOrder } from "@/lib/printer";
 
 export default function Dashboard() {
-  const { orders, activeOrders, updateOrderStatus, getClientHistory, addOrder, playNotificationSound } = useOrders();
+  const { orders, activeOrders, updateOrderStatus, updateOrderDetails, deleteOrder, getClientHistory, addOrder, playNotificationSound } = useOrders();
   const [isNewOrderOpen, setIsNewOrderOpen] = useState(false);
-  const { currentTheme } = useAppSettings();
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [animatingDeleteId, setAnimatingDeleteId] = useState<string | null>(null);
+  const [editingOrder, setEditingOrder] = useState<Order | null>(null);
+  const { currentTheme, settings } = useAppSettings();
 
   // Get today's date string to match order format (approximate for prototype)
   const today = new Date().toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" });
@@ -69,12 +80,12 @@ export default function Dashboard() {
                 id: `sim-${Date.now()}`,
                 customerName: "TEST ALERT",
                 phoneNumber: "06 00 00 00 00",
-                items: [{ name: "🔔 Test Sonore", quantity: 1 }],
+                items: [{ name: "🔔 Test Sonore", quantity: 1, price: 0 }],
                 totalPrice: 0,
                 status: "nouveau",
                 type: "emporter",
                 timestamp: now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
-                date: "18 Jan 2026"
+                date: now.toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' }).replace(',', '')
               });
             }}
             className="flex items-center gap-2 text-slate-600 bg-white border border-slate-200 px-4 py-2.5 rounded-xl font-bold hover:bg-slate-50 transition-all shadow-sm active:scale-95"
@@ -162,7 +173,7 @@ export default function Dashboard() {
       {/* Active Orders List */}
       <div className="bg-white rounded-2xl border shadow-sm overflow-hidden min-h-[400px]">
         <div className="px-6 py-4 border-b flex items-center justify-between">
-          <h2 className="text-lg font-bold">Commandes en cours</h2>
+          <h2 className="text-lg font-bold text-slate-900">Commandes en cours</h2>
         </div>
 
         <div className="divide-y overflow-x-auto">
@@ -207,69 +218,109 @@ export default function Dashboard() {
 
                 return (
                   <div key={order.id} className={cn(
-                    "p-6 flex flex-col md:flex-row md:items-center justify-between gap-6 transition-all group border-l-[6px]",
+                    "p-6 transition-all group border-l-[6px] relative",
                     isPriority
                       ? "bg-red-50 border-red-600 shadow-red-100 animate-pulse"
-                      : "hover:bg-slate-50 border-transparent"
+                      : "hover:bg-slate-50 border-transparent",
+                    animatingDeleteId === order.id && "animate-trash-exit"
                   )}
                     style={isPriority ? {
-                      animationDuration: '2s' // Slower pulse for better readability
+                      animationDuration: '2s', // Slower pulse for better readability
+                      isolation: 'isolate' // Prevent stacking context issues
                     } : undefined}
                   >
-                    <div className="flex gap-4">
-                      <div className={cn(
-                        "relative h-12 w-12 rounded-xl flex items-center justify-center shrink-0",
-                        isPriority ? "bg-red-100 text-red-600" :
-                          order.type === "livraison" ? "bg-blue-50 text-blue-600" : "bg-orange-50 text-orange-600"
-                      )}>
-                        {order.type === "livraison" ? <Truck className="h-6 w-6" /> : <ShoppingBag className="h-6 w-6" />}
+                    {/* Grid layout for consistent alignment */}
+                    <div className="grid grid-cols-12 gap-4 items-center">
+                      {/* Icon + Name + Phone/Time - 5 columns */}
+                      <div className="col-span-12 md:col-span-5 flex gap-4 items-center">
+                        <div className={cn(
+                          "relative h-12 w-12 rounded-xl flex items-center justify-center shrink-0",
+                          isPriority ? "bg-red-100 text-red-600" :
+                            order.type === "livraison" ? "bg-blue-50 text-blue-600" :
+                              order.type === "sur_place" ? "bg-purple-50 text-purple-600" : "bg-orange-50 text-orange-600"
+                        )}>
+                          {order.type === "livraison" ? <Truck className="h-6 w-6" /> :
+                            order.type === "sur_place" ? <Utensils className="h-6 w-6" /> : <ShoppingBag className="h-6 w-6" />}
 
-                        {isPriority && (
-                          <div
-                            className="absolute -top-3 -right-3 bg-red-600 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-full shadow-lg flex items-center gap-0.5 animate-bounce"
-                          >
-                            <span>🔥</span>
-                            <span>{waitTime}m</span>
+                          {isPriority && (
+                            <div
+                              className="absolute -top-3 -right-3 bg-red-600 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-full shadow-lg flex items-center gap-0.5 animate-bounce"
+                            >
+                              <span>🔥</span>
+                              <span>{waitTime}m</span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="space-y-1 min-w-0 flex-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="font-bold text-slate-900 text-base">{order.customerName}</span>
+                            <StatusInfo status={order.status} />
+                            {isPriority && (
+                              <span
+                                className="text-xs font-bold px-2 py-0.5 rounded-full border bg-red-600 text-white border-red-700 animate-none"
+                              >
+                                URGENT
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500">
+                            <span className="flex items-center gap-1"><Phone className="h-3 w-3" /> {order.phoneNumber}</span>
+                            <span className={cn("flex items-center gap-1 font-medium", isPriority ? "text-red-600 font-bold" : "")}>
+                              <Clock className="h-3 w-3" /> {order.timestamp}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Items - 4 columns */}
+                      <div className="col-span-12 md:col-span-4">
+                        <p className="text-sm font-medium text-slate-700 line-clamp-2">
+                          {order.items.map(i => `${i.quantity}x ${i.name}`).join(", ")}
+                        </p>
+                        {order.notes && (
+                          <div className="mt-2 text-xs flex items-start gap-1.5 text-amber-600 bg-amber-50 p-2 rounded-lg border border-amber-100">
+                            <StickyNote className="h-3 w-3 shrink-0 mt-0.5" />
+                            <span className="font-medium italic">"{order.notes}"</span>
                           </div>
                         )}
                       </div>
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <span className="font-bold text-slate-900">{order.customerName}</span>
-                          <StatusInfo status={order.status} />
-                          {isPriority && (
-                            <span
-                              className="text-xs font-bold px-2 py-0.5 rounded-full border bg-red-600 text-white border-red-700 animate-none"
-                            >
-                              URGENT
-                            </span>
-                          )}
+
+                      {/* Price + Status - 3 columns */}
+                      <div className="col-span-12 md:col-span-3 flex items-center justify-between md:justify-end gap-3">
+                        <div className="text-right min-w-[80px]">
+                          <div className={cn("text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r", currentTheme.gradient)}>{formatPrice(order.totalPrice)}</div>
+                          <div className="text-[10px] text-slate-500 uppercase font-semibold tracking-wide">{order.type}</div>
                         </div>
-                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-500">
-                          <span className="flex items-center gap-1.5"><Phone className="h-3.5 w-3.5" /> {order.phoneNumber}</span>
-                          <span className={cn("flex items-center gap-1.5 font-medium", isPriority ? "text-red-600 font-bold" : "")}>
-                            <Clock className="h-3.5 w-3.5" /> {order.timestamp}
-                          </span>
-                        </div>
+
+                        <StatusSelect
+                          currentStatus={order.status}
+                          onStatusChange={(status) => updateOrderStatus(order.id, status)}
+                        />
+
+                        <button
+                          onClick={() => setEditingOrder(order)}
+                          className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
+                          title="Modifier"
+                        >
+                          <Pencil className="h-5 w-5" />
+                        </button>
+
+                        <button
+                          onClick={() => printOrder(order, settings)}
+                          className="p-2 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
+                          title="Imprimer"
+                        >
+                          <Printer className="h-5 w-5" />
+                        </button>
+
+                        <button
+                          onClick={() => setConfirmDeleteId(order.id)}
+                          className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                          title="Supprimer"
+                        >
+                          <Trash2 className="h-5 w-5" />
+                        </button>
                       </div>
-                    </div>
-
-                    <div className="flex-1 max-w-md">
-                      <p className="text-sm font-medium text-slate-700">
-                        {order.items.map(i => `${i.quantity}x ${i.name}`).join(", ")}
-                      </p>
-                    </div>
-
-                    <div className="flex items-center justify-between md:justify-end gap-4">
-                      <div className="text-right min-w-[80px]">
-                        <div className={cn("text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r", currentTheme.gradient)}>{formatPrice(order.totalPrice)}</div>
-                        <div className="text-xs text-slate-500 uppercase font-semibold">{order.type}</div>
-                      </div>
-
-                      <StatusSelect
-                        currentStatus={order.status}
-                        onStatusChange={(status) => updateOrderStatus(order.id, status)}
-                      />
                     </div>
                   </div>
                 );
@@ -279,13 +330,42 @@ export default function Dashboard() {
       </div>
 
       {
-        isNewOrderOpen && (
+        (isNewOrderOpen || editingOrder) && (
           <NewOrderModal
-            onClose={() => setIsNewOrderOpen(false)}
-            onSubmit={addOrder}
+            onClose={() => {
+              setIsNewOrderOpen(false);
+              setEditingOrder(null);
+            }}
+            onSubmit={(order) => {
+              if (editingOrder) {
+                updateOrderDetails(order);
+              } else {
+                addOrder(order);
+              }
+            }}
+            initialOrder={editingOrder}
           />
         )
       }
+
+      <DeleteModal
+        isOpen={!!confirmDeleteId}
+        onClose={() => setConfirmDeleteId(null)}
+        onConfirm={() => {
+          if (confirmDeleteId) {
+            setAnimatingDeleteId(confirmDeleteId);
+            setConfirmDeleteId(null);
+
+            // Wait for animation to finish before actual delete
+            setTimeout(() => {
+              deleteOrder(confirmDeleteId);
+              setAnimatingDeleteId(null);
+            }, 500);
+          }
+        }}
+        title="Supprimer la commande ?"
+        description="Cette action est irréversible. La commande sera supprimée du tableau de bord."
+      />
     </div >
   );
 }
@@ -305,6 +385,43 @@ function StatusInfo({ status }: { status: OrderStatus }) {
 
 function StatusSelect({ currentStatus, onStatusChange }: { currentStatus: OrderStatus, onStatusChange: (s: OrderStatus) => void }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, right: 0 });
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (isOpen && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setDropdownPosition({
+        top: rect.bottom + 8,
+        right: window.innerWidth - rect.right
+      });
+    }
+  }, [isOpen]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        buttonRef.current &&
+        !buttonRef.current.contains(event.target as Node) &&
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isOpen]);
 
   const gradients = {
     nouveau: "bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-blue-500/20",
@@ -330,8 +447,9 @@ function StatusSelect({ currentStatus, onStatusChange }: { currentStatus: OrderS
   const CurrentIcon = icons[currentStatus] || MoreVertical;
 
   return (
-    <div className="relative">
+    <>
       <button
+        ref={buttonRef}
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
           "flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm transition-all shadow-lg hover:brightness-110",
@@ -343,8 +461,12 @@ function StatusSelect({ currentStatus, onStatusChange }: { currentStatus: OrderS
         <ChevronDown className={cn("h-4 w-4 ml-1 transition-transform", isOpen && "rotate-180")} />
       </button>
 
-      {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-xl border p-1.5 z-50 animate-in fade-in slide-in-from-top-2">
+      {isMounted && isOpen && createPortal(
+        <div
+          ref={dropdownRef}
+          className="fixed w-48 bg-white rounded-xl shadow-2xl border p-1.5 z-[99999] animate-in fade-in slide-in-from-top-2"
+          style={{ top: `${dropdownPosition.top}px`, right: `${dropdownPosition.right}px` }}
+        >
           {(Object.keys(gradients) as OrderStatus[]).map((status) => (
             <button
               key={status}
@@ -366,8 +488,9 @@ function StatusSelect({ currentStatus, onStatusChange }: { currentStatus: OrderS
               {labels[status]}
             </button>
           ))}
-        </div>
+        </div>,
+        document.body
       )}
-    </div>
+    </>
   );
 }

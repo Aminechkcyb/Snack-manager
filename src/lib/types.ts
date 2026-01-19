@@ -1,9 +1,10 @@
 export type OrderStatus = "nouveau" | "en_cours" | "termine" | "annule";
-export type OrderType = "emporter" | "livraison";
+export type OrderType = "emporter" | "livraison" | "sur_place";
 
 export interface OrderItem {
     name: string;
     quantity: number;
+    price: number;
 }
 
 export interface Order {
@@ -16,4 +17,5 @@ export interface Order {
     type: OrderType;
     timestamp: string; // Time of order (e.g., "19:45")
     date: string; // Date of order (e.g., "17 Jan 2026")
+    notes?: string;
 }

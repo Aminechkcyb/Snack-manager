@@ -7,7 +7,7 @@ const LOYAL_CLIENT_ORDERS = Array.from({ length: 25 }).map((_, i) => ({
     id: `loyal-${i}`,
     customerName: "Sophie Martin",
     phoneNumber: "06 00 00 00 00",
-    items: [{ name: "Menu complet", quantity: 1 }],
+    items: [{ name: "Menu complet", quantity: 1, price: 15.00 }],
     totalPrice: 15.00,
     status: "termine" as OrderStatus,
     type: "emporter" as const,
@@ -15,14 +15,69 @@ const LOYAL_CLIENT_ORDERS = Array.from({ length: 25 }).map((_, i) => ({
     date: "15 Jan 2026"
 }));
 
+const GENERATED_ACTIVE_ORDERS = Array.from({ length: 50 }).map((_, i) => ({
+    id: `auto-${i + 1000}`,
+    customerName: `Client #${i + 1}`,
+    phoneNumber: `06 ${Math.floor(Math.random() * 90) + 10} ${Math.floor(Math.random() * 90) + 10} ${Math.floor(Math.random() * 90) + 10} ${Math.floor(Math.random() * 90) + 10}`,
+    items: i % 3 === 0 ? [{ name: "Tacos XL", quantity: 1, price: 9.50 }, { name: "Boisson", quantity: 1, price: 2.50 }] :
+        i % 3 === 1 ? [{ name: "Burger Double", quantity: 1, price: 8.50 }, { name: "Frites", quantity: 1, price: 3.50 }] :
+            [{ name: "Pizza Reine", quantity: 1, price: 12.00 }],
+    totalPrice: 12 + Math.floor(Math.random() * 15),
+    status: "nouveau" as OrderStatus,
+    type: (Math.random() > 0.6 ? "livraison" : Math.random() > 0.3 ? "emporter" : "sur_place") as "emporter" | "livraison" | "sur_place",
+    timestamp: `${19 + Math.floor(i / 20)}:${String(Math.floor(Math.random() * 60)).padStart(2, '0')}`,
+    date: "19 Jan 2026" // Today
+}));
+
+const SAMPLE_PRODUCTS = [
+    { name: "Burger Double Cheese", price: 8.50 },
+    { name: "Tacos M", price: 7.00 },
+    { name: "Coca Cola", price: 2.50 },
+    { name: "Frites", price: 3.50 },
+    { name: "Pizza Reine", price: 12.00 },
+    { name: "Tiramisu", price: 4.50 },
+    { name: "Sandwich Steak", price: 6.50 },
+    { name: "Ice Tea Pêche", price: 2.50 }
+];
+
+const GENERATED_HISTORY_ORDERS = Array.from({ length: 50 }).map((_, i) => {
+    // Generate dates for the last 7 days
+    const dayOffset = Math.floor(i / 8);
+    const date = new Date(2026, 0, 19 - dayOffset); // Jan 19, 18, 17...
+    const dateStr = date.toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' }).replace(',', '');
+
+    // Randomize items (1 to 3 items)
+    const numItems = Math.floor(Math.random() * 3) + 1;
+    const orderItems = Array.from({ length: numItems }).map(() => {
+        const product = SAMPLE_PRODUCTS[Math.floor(Math.random() * SAMPLE_PRODUCTS.length)];
+        return { name: product.name, quantity: Math.floor(Math.random() * 2) + 1, price: product.price };
+    });
+
+    const calculatedTotal = orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+    return {
+        id: `hist-${i + 2000}`,
+        customerName: `Client Historique #${i + 1}`,
+        phoneNumber: `06 ${Math.floor(Math.random() * 90) + 10} ${Math.floor(Math.random() * 90) + 10} ${Math.floor(Math.random() * 90) + 10} ${Math.floor(Math.random() * 90) + 10}`,
+        items: orderItems.map(i => ({ name: i.name, quantity: i.quantity, price: i.price })),
+        totalPrice: calculatedTotal,
+        status: (Math.random() > 0.8 ? "annule" : "termine") as OrderStatus,
+        type: (Math.random() > 0.6 ? "livraison" : Math.random() > 0.3 ? "emporter" : "sur_place") as "emporter" | "livraison" | "sur_place",
+        timestamp: `${11 + Math.floor(Math.random() * 12)}:${String(Math.floor(Math.random() * 60)).padStart(2, '0')}`,
+        date: dateStr
+    };
+});
+
 const INITIAL_ORDERS: Order[] = [
+    ...GENERATED_ACTIVE_ORDERS,
+    ...GENERATED_HISTORY_ORDERS,
     ...LOYAL_CLIENT_ORDERS,
     // Active Orders (Dashboard)
     {
         id: "105",
         customerName: "Thomas Martin",
         phoneNumber: "06 11 22 33 44",
-        items: [{ name: "Menu Burger Double", quantity: 2 }, { name: "Nuggets x6", quantity: 1 }],
+        items: [{ name: "Menu Burger Double", quantity: 2, price: 12.00 }, { name: "Nuggets x6", quantity: 1, price: 4.50 }],
         totalPrice: 28.50,
         status: "nouveau",
         type: "livraison",
@@ -41,7 +96,7 @@ const INITIAL_ORDERS: Order[] = [
         id: "104",
         customerName: "Sarah Connor",
         phoneNumber: "06 99 88 77 66",
-        items: [{ name: "Tacos 3 Viandes", quantity: 1 }, { name: "Tiramisu", quantity: 1 }],
+        items: [{ name: "Tacos 3 Viandes", quantity: 1, price: 10.50 }, { name: "Tiramisu", quantity: 1, price: 4.50 }],
         totalPrice: 15.00,
         status: "en_cours",
         type: "emporter",
@@ -52,7 +107,7 @@ const INITIAL_ORDERS: Order[] = [
         id: "103",
         customerName: "Lucas Dubreuil",
         phoneNumber: "07 55 44 33 22",
-        items: [{ name: "Pizza 4 Fromages", quantity: 1 }, { name: "Coca-Cola 1.5L", quantity: 1 }],
+        items: [{ name: "Pizza 4 Fromages", quantity: 1, price: 13.50 }, { name: "Coca-Cola 1.5L", quantity: 1, price: 3.00 }],
         totalPrice: 16.50,
         status: "nouveau",
         type: "emporter",
@@ -65,7 +120,7 @@ const INITIAL_ORDERS: Order[] = [
         id: "102",
         customerName: "Marie Lemoine",
         phoneNumber: "07 88 99 00 11",
-        items: [{ name: "Tacos XL", quantity: 1 }, { name: "Coca-Cola", quantity: 1 }],
+        items: [{ name: "Tacos XL", quantity: 1, price: 9.50 }, { name: "Coca-Cola", quantity: 1, price: 2.50 }],
         totalPrice: 12.00,
         status: "termine",
         type: "livraison",
@@ -76,7 +131,7 @@ const INITIAL_ORDERS: Order[] = [
         id: "101",
         customerName: "Jean Dupont",
         phoneNumber: "06 12 34 56 78",
-        items: [{ name: "Burger Classic", quantity: 2 }, { name: "Frites", quantity: 1 }],
+        items: [{ name: "Burger Classic", quantity: 2, price: 10.50 }, { name: "Frites", quantity: 1, price: 3.50 }],
         totalPrice: 24.50,
         status: "termine",
         type: "emporter",
@@ -87,7 +142,7 @@ const INITIAL_ORDERS: Order[] = [
         id: "99",
         customerName: "Sophie Morel",
         phoneNumber: "06 55 11 22 33",
-        items: [{ name: "Salade César", quantity: 1 }, { name: "Eau Minérale", quantity: 1 }],
+        items: [{ name: "Salade César", quantity: 1, price: 8.50 }, { name: "Eau Minérale", quantity: 1, price: 2.00 }],
         totalPrice: 10.50,
         status: "termine",
         type: "emporter",
@@ -98,7 +153,7 @@ const INITIAL_ORDERS: Order[] = [
         id: "98",
         customerName: "Jean Dupont", // Loyal customer example
         phoneNumber: "06 12 34 56 78",
-        items: [{ name: "Pizza Regina", quantity: 1 }],
+        items: [{ name: "Pizza Regina", quantity: 1, price: 14.00 }],
         totalPrice: 14.00,
         status: "termine",
         type: "livraison",
@@ -109,7 +164,7 @@ const INITIAL_ORDERS: Order[] = [
         id: "97",
         customerName: "Pierre Durand",
         phoneNumber: "07 44 55 66 77",
-        items: [{ name: "Burger Enfant", quantity: 1 }, { name: "Capri-Sun", quantity: 1 }],
+        items: [{ name: "Burger Enfant", quantity: 1, price: 6.00 }, { name: "Capri-Sun", quantity: 1, price: 2.00 }],
         totalPrice: 8.00,
         status: "annule",
         type: "emporter",
@@ -120,7 +175,7 @@ const INITIAL_ORDERS: Order[] = [
         id: "96",
         customerName: "Jean Dupont", // Loyal customer example
         phoneNumber: "06 12 34 56 78",
-        items: [{ name: "Tacos L", quantity: 2 }],
+        items: [{ name: "Tacos L", quantity: 2, price: 10.00 }],
         totalPrice: 20.00,
         status: "termine",
         type: "emporter",
@@ -134,12 +189,12 @@ export function useOrders() {
     const [isLoaded, setIsLoaded] = useState(false);
 
     useEffect(() => {
-        const saved = localStorage.getItem("snackOrders_v3");
+        const saved = localStorage.getItem("snackOrders_v7");
         if (saved) {
             setOrders(JSON.parse(saved));
         } else {
             setOrders(INITIAL_ORDERS);
-            localStorage.setItem("snackOrders_v3", JSON.stringify(INITIAL_ORDERS));
+            localStorage.setItem("snackOrders_v5", JSON.stringify(INITIAL_ORDERS));
         }
         setIsLoaded(true);
     }, []);
@@ -217,13 +272,18 @@ export function useOrders() {
 
     const saveOrders = (newOrders: Order[]) => {
         setOrders(newOrders);
-        localStorage.setItem("snackOrders_v2", JSON.stringify(newOrders));
+        localStorage.setItem("snackOrders_v5", JSON.stringify(newOrders));
     };
 
     const updateOrderStatus = (id: string, newStatus: OrderStatus) => {
         const newOrders = orders.map(o =>
             o.id === id ? { ...o, status: newStatus } : o
         );
+        saveOrders(newOrders);
+    };
+
+    const deleteOrder = (id: string) => {
+        const newOrders = orders.filter(o => o.id !== id);
         saveOrders(newOrders);
     };
 
@@ -242,6 +302,13 @@ export function useOrders() {
         });
     };
 
+    const updateOrderDetails = (updatedOrder: Order) => {
+        const newOrders = orders.map(o =>
+            o.id === updatedOrder.id ? updatedOrder : o
+        );
+        saveOrders(newOrders);
+    };
+
     const addOrder = (order: Order) => {
         const newOrders = [order, ...orders];
         saveOrders(newOrders);
@@ -255,6 +322,8 @@ export function useOrders() {
         updateOrderStatus,
         getClientHistory,
         addOrder,
+        updateOrderDetails,
+        deleteOrder,
         isLoaded,
         playNotificationSound
     };

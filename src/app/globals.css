@@ -4,37 +4,59 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #0f172a;
-  --primary: #2563eb;
-  --primary-foreground: #ffffff;
-  --secondary: #f8fafc;
-  --secondary-foreground: #0f172a;
-  --accent: #eff6ff;
-  --border: #e2e8f0;
+  --foreground: #171717;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
 }
 
 body {
-  background-color: var(--background);
   color: var(--foreground);
+  background: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
 }
 
 @layer utilities {
-  .bg-gradient-primary {
-    @apply bg-gradient-to-br from-blue-600 to-cyan-500;
+  .text-balance {
+    text-wrap: balance;
   }
 
-  .text-gradient-primary {
-    @apply bg-gradient-to-br from-blue-600 to-cyan-500 bg-clip-text text-transparent;
+  /* Animations */
+  @keyframes trash-exit {
+    0% {
+      transform: scale(1);
+      opacity: 1;
+    }
+
+    30% {
+      transform: scale(0.7) rotate(-5deg);
+      /* Start crinkling */
+    }
+
+    60% {
+      transform: scale(0.3) rotate(45deg) translateY(-50px);
+      /* Ball shape, tossed up slightly */
+      opacity: 0.8;
+      border-radius: 50%;
+      /* Look like a ball */
+    }
+
+    100% {
+      transform: scale(0) rotate(180deg) translateY(300px);
+      /* Drop down (into trash) */
+      opacity: 0;
+      height: 0;
+      margin: 0;
+      padding: 0;
+    }
   }
 
-  .icon-gradient {
-    @apply text-blue-600;
-    /* Fallback */
-  }
-}
-
-@layer base {
-  * {
-    @apply border-border;
+  .animate-trash-exit {
+    animation: trash-exit 0.5s ease-out forwards;
+    pointer-events: none;
   }
 }

@@ -61,7 +61,7 @@ export function ProductModal({ onClose, onSave, initialProduct }: ProductModalPr
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
             <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
                 <div className="flex items-center justify-between p-4 border-b">
-                    <h2 className="text-lg font-bold text-slate-900">
+                    <h2 className="text-xl font-bold text-slate-900">
                         {initialProduct ? "Modifier le produit" : "Ajouter un produit"}
                     </h2>
                     <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
@@ -89,11 +89,11 @@ export function ProductModal({ onClose, onSave, initialProduct }: ProductModalPr
                                     className={cn("w-full h-full", imageFit === 'contain' ? "object-contain" : "object-cover")}
                                 />
                             ) : (
-                                <div className={cn("flex flex-col items-center gap-2 text-slate-500", `group-hover:${currentTheme.solidText}`)}>
-                                    <div className="p-4 bg-white rounded-full shadow-sm group-hover:shadow-md transition-all">
+                                <div className={cn("flex flex-col items-center gap-2 text-slate-900", `group-hover:${currentTheme.solidText}`)}>
+                                    <div className="p-4 bg-white border-2 border-slate-200 rounded-full shadow-sm group-hover:shadow-md transition-all">
                                         <Upload className="h-6 w-6" />
                                     </div>
-                                    <span className="text-sm font-medium">Importer une photo</span>
+                                    <span className="text-sm font-bold">Importer une photo</span>
                                 </div>
                             )}
                             <input
@@ -143,7 +143,7 @@ export function ProductModal({ onClose, onSave, initialProduct }: ProductModalPr
 
                     <div className="space-y-4">
                         <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-1">Nom du produit</label>
+                            <label className="block text-sm font-bold text-slate-900 mb-1">Nom du produit</label>
                             <input
                                 type="text"
                                 required
@@ -151,7 +151,7 @@ export function ProductModal({ onClose, onSave, initialProduct }: ProductModalPr
                                 onChange={(e) => setName(e.target.value)}
                                 placeholder="Ex: Burger Double Cheese"
                                 className={cn(
-                                    "w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:border-transparent transition-all font-medium",
+                                    "w-full px-4 py-2 rounded-xl border-2 border-slate-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:border-transparent transition-all font-bold placeholder:text-slate-400",
                                     `focus:${currentTheme.ringColor}/20`
                                 )}
                             />
@@ -159,7 +159,7 @@ export function ProductModal({ onClose, onSave, initialProduct }: ProductModalPr
 
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">Prix (€)</label>
+                                <label className="block text-sm font-bold text-slate-900 mb-1">Prix (€)</label>
                                 <input
                                     type="number"
                                     required
@@ -169,18 +169,18 @@ export function ProductModal({ onClose, onSave, initialProduct }: ProductModalPr
                                     onChange={(e) => setPrice(e.target.value)}
                                     placeholder="0.00"
                                     className={cn(
-                                        "w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:border-transparent transition-all font-medium",
+                                        "w-full px-4 py-2 rounded-xl border-2 border-slate-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:border-transparent transition-all font-bold placeholder:text-slate-400",
                                         `focus:${currentTheme.ringColor}/20`
                                     )}
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">Catégorie</label>
+                                <label className="block text-sm font-bold text-slate-900 mb-1">Catégorie</label>
                                 <select
                                     value={category}
                                     onChange={(e) => setCategory(e.target.value)}
                                     className={cn(
-                                        "w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:border-transparent transition-all font-medium bg-white",
+                                        "w-full px-4 py-2 rounded-xl border-2 border-slate-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:border-transparent transition-all font-bold",
                                         `focus:${currentTheme.ringColor}/20`
                                     )}
                                 >

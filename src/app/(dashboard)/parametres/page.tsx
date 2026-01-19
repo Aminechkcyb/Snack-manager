@@ -44,16 +44,16 @@ export default function SettingsPage() {
         <div className="max-w-4xl mx-auto space-y-12">
             <div className="flex flex-col gap-1">
                 <h1 className="text-3xl font-bold text-slate-900">Paramètres</h1>
-                <p className="text-slate-500">Configurez votre application et vos préférences</p>
+                <p className="text-slate-600 font-medium">Configurez votre application et vos préférences</p>
             </div>
 
             {/* Profil du Restaurant */}
             <section className="space-y-6">
-                <h2 className="text-xl font-bold flex items-center gap-2">
+                <h2 className="text-xl font-bold flex items-center gap-2 text-slate-900">
                     <Building2 className={cn("h-5 w-5", currentTheme.solidText)} />
                     Profil du Restaurant
                 </h2>
-                <div className="bg-white p-8 rounded-2xl border shadow-sm space-y-6">
+                <div className="bg-white p-8 rounded-2xl border-2 border-slate-200 shadow-sm space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="space-y-2">
                             <label className="text-sm font-bold text-slate-700">Nom de l'établissement</label>
@@ -62,7 +62,7 @@ export default function SettingsPage() {
                                 value={settings.restaurantName}
                                 onChange={(e) => updateSettings({ restaurantName: e.target.value })}
                                 className={cn(
-                                    "w-full px-4 py-2 bg-slate-50 border rounded-xl focus:outline-none focus:ring-2 transition-all",
+                                    "w-full px-4 py-2 bg-white border-2 border-slate-200 rounded-xl text-slate-900 font-medium focus:outline-none focus:ring-2 transition-all placeholder:text-slate-400",
                                     currentTheme.ringColor ? `focus:ring-${currentTheme.ringColor}/20` : "focus:ring-blue-500/20"
                                 )}
                                 style={settings.primaryColor === 'custom' ? { outlineColor: settings.customColor } : {}}
@@ -73,19 +73,19 @@ export default function SettingsPage() {
                                 <label className="text-sm font-bold text-slate-700">Logo du restaurant</label>
                                 <div className="flex items-center gap-4">
                                     <div className={cn(
-                                        "bg-slate-50 rounded-xl flex items-center justify-center overflow-hidden border transition-all duration-300",
+                                        "bg-white rounded-xl flex items-center justify-center overflow-hidden border-2 border-slate-300 transition-all duration-300",
                                         settings.logo ? "p-0" : "p-2"
                                     )} style={{ height: settings.logoSize || 40, width: settings.logoSize || 40 }}>
                                         {settings.logo ? (
                                             <img src={settings.logo} alt="Logo" className="w-full h-full object-contain" />
                                         ) : (
-                                            <span className="text-xs font-bold text-slate-400">Log</span>
+                                            <span className="text-xs font-bold text-slate-600">Logo</span>
                                         )}
                                     </div>
                                     <div className="flex flex-col gap-2">
                                         <button
                                             onClick={() => fileInputRef.current?.click()}
-                                            className="flex items-center gap-2 px-4 py-2 border rounded-xl text-sm font-bold hover:bg-slate-50 transition-colors"
+                                            className="flex items-center gap-2 px-4 py-2 border-2 border-slate-300 bg-white rounded-xl text-sm font-bold text-slate-900 hover:bg-slate-50 transition-colors"
                                         >
                                             <Upload className="h-4 w-4" />
                                             Changer le logo
@@ -112,7 +112,7 @@ export default function SettingsPage() {
                             <div className="space-y-2">
                                 <label className="text-sm font-bold text-slate-700 flex justify-between">
                                     Taille du logo
-                                    <span className="text-slate-500 font-normal">{settings.logoSize || 40}px</span>
+                                    <span className="text-slate-900 font-bold">{settings.logoSize || 40}px</span>
                                 </label>
                                 <input
                                     type="range"
@@ -121,7 +121,7 @@ export default function SettingsPage() {
                                     step="4"
                                     value={settings.logoSize || 40}
                                     onChange={(e) => updateSettings({ logoSize: parseInt(e.target.value) })}
-                                    className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-slate-900"
+                                    className="w-full h-2 bg-slate-300 rounded-lg appearance-none cursor-pointer accent-slate-900"
                                 />
                             </div>
                         </div>
@@ -131,11 +131,11 @@ export default function SettingsPage() {
 
             {/* Personnalisation */}
             <section className="space-y-6">
-                <h2 className="text-xl font-bold flex items-center gap-2">
+                <h2 className="text-xl font-bold flex items-center gap-2 text-slate-900">
                     <Palette className={cn("h-5 w-5", currentTheme.solidText)} />
                     Personnalisation visuelle
                 </h2>
-                <div className="bg-white p-8 rounded-2xl border shadow-sm space-y-6">
+                <div className="bg-white p-8 rounded-2xl border-2 border-slate-200 shadow-sm space-y-6">
                     <div className="space-y-4">
                         <label className="text-sm font-bold text-slate-700">Thème de l'interface</label>
                         <div className="flex flex-wrap gap-4">
@@ -210,19 +210,30 @@ export default function SettingsPage() {
 
             {/* Système de Fidélité */}
             <section className="space-y-6">
-                <h2 className="text-xl font-bold flex items-center gap-2">
+                <h2 className="text-xl font-bold flex items-center gap-2 text-slate-900">
                     <Star className={cn("h-5 w-5", currentTheme.solidText)} />
                     Programme de Fidélité
                 </h2>
-                <div className="bg-white p-8 rounded-2xl border shadow-sm space-y-6">
+                <div className="bg-white p-8 rounded-2xl border-2 border-slate-200 shadow-sm space-y-6">
                     <div className="flex items-center justify-between">
                         <div className="space-y-1">
                             <div className="font-bold text-slate-900">Activer la fidélité</div>
-                            <div className="text-sm text-slate-500">Offrez des étoiles à chaque commande</div>
+                            <div className="text-sm text-slate-600 font-medium">Offrez des étoiles à chaque commande</div>
                         </div>
-                        <div className={cn("h-6 w-11 rounded-full relative bg-gradient-to-r", currentTheme.gradient)}>
-                            <div className="absolute right-1 top-1 h-4 w-4 bg-white rounded-full shadow-sm" />
-                        </div>
+                        <button
+                            onClick={() => updateSettings({ enableLoyalty: !settings.enableLoyalty })}
+                            className={cn(
+                                "h-6 w-11 rounded-full relative transition-colors duration-200 ease-in-out",
+                                settings.enableLoyalty ? `bg-gradient-to-r ${currentTheme.gradient}` : "bg-slate-200"
+                            )}
+                        >
+                            <div
+                                className={cn(
+                                    "absolute top-1 h-4 w-4 bg-white rounded-full shadow-sm transition-all duration-200",
+                                    settings.enableLoyalty ? "right-1" : "left-1"
+                                )}
+                            />
+                        </button>
                     </div>
                     <div className="space-y-2">
                         <label className="text-sm font-bold text-slate-700">Nombre de commandes pour 1 étoile</label>
@@ -233,7 +244,7 @@ export default function SettingsPage() {
                                 value={settings.loyaltyTarget || 10}
                                 onChange={(e) => updateSettings({ loyaltyTarget: Math.max(1, parseInt(e.target.value) || 10) })}
                                 className={cn(
-                                    "w-24 px-4 py-2 bg-slate-50 border rounded-xl focus:outline-none focus:ring-2 transition-all",
+                                    "w-24 px-4 py-2 bg-white border-2 border-slate-200 rounded-xl text-slate-900 font-bold focus:outline-none focus:ring-2 transition-all",
                                     currentTheme.ringColor ? `focus:ring-${currentTheme.ringColor}/20` : "focus:ring-blue-500/20"
                                 )}
                                 style={settings.primaryColor === 'custom' ? { outlineColor: settings.customColor } : {}}
@@ -249,29 +260,29 @@ export default function SettingsPage() {
 
             {/* Abonnement et Utilisation */}
             <section className="space-y-6">
-                <h2 className="text-xl font-bold flex items-center gap-2">
+                <h2 className="text-xl font-bold flex items-center gap-2 text-slate-900">
                     <CreditCard className={cn("h-5 w-5", currentTheme.solidText)} />
                     Abonnement & Utilisation
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
+                    <div className="bg-white p-6 rounded-2xl border-2 border-slate-200 shadow-sm space-y-4">
                         <div className="flex items-center justify-between">
-                            <span className="text-slate-500 text-sm font-medium">Commandes ce mois</span>
-                            <BarChart3 className="h-5 w-5 text-slate-300" />
+                            <span className="text-slate-700 text-sm font-bold">Commandes ce mois</span>
+                            <BarChart3 className="h-5 w-5 text-slate-400" />
                         </div>
-                        <div className="text-3xl font-bold">1,284</div>
-                        <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                        <div className="text-3xl font-bold text-slate-900">1,284</div>
+                        <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
                             <div className={cn("h-full bg-gradient-to-r", currentTheme.gradient)} style={{ width: '65%' }} />
                         </div>
-                        <div className="text-xs text-slate-500">65% du plafond (2,000)</div>
+                        <div className="text-xs text-slate-600 font-bold">65% du plafond (2,000)</div>
                     </div>
 
-                    <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
+                    <div className="bg-white p-6 rounded-2xl border-2 border-slate-200 shadow-sm space-y-4">
                         <div className="flex items-center justify-between">
-                            <span className="text-slate-500 text-sm font-medium">Plan actuel</span>
+                            <span className="text-slate-700 text-sm font-bold">Plan actuel</span>
                             <span className={cn("text-xs font-bold px-2 py-1 rounded", currentTheme.lightBg, currentTheme.solidText)}>PREMIUM</span>
                         </div>
-                        <div className="text-2xl font-bold">Pack Business Plus</div>
+                        <div className="text-2xl font-bold text-slate-900">Pack Business Plus</div>
                         <button className={cn("flex items-center gap-2 font-bold text-sm hover:underline transition-all", currentTheme.solidText)}>
                             Gérer mon abonnement
                             <ChevronRight className="h-4 w-4" />
@@ -324,7 +335,7 @@ function TeamManagement() {
 
     return (
         <section className="space-y-6">
-            <h2 className="text-xl font-bold flex items-center gap-2">
+            <h2 className="text-xl font-bold flex items-center gap-2 text-slate-900">
                 <Users className={cn("h-5 w-5", currentTheme.solidText)} />
                 Gestion de l'équipe
             </h2>
@@ -336,13 +347,13 @@ function TeamManagement() {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-slate-50 rounded-xl border border-dashed border-slate-300">
                         <input
                             placeholder="Prénom du serveur"
-                            className="px-4 py-2 rounded-lg border focus:ring-2 focus:ring-slate-200 outline-none"
+                            className="px-4 py-2 bg-white rounded-lg border-2 border-slate-200 text-slate-900 focus:ring-2 focus:ring-slate-200 outline-none placeholder:text-slate-400 font-medium"
                             value={newName}
                             onChange={e => setNewName(e.target.value)}
                         />
                         <input
                             placeholder="Code d'accès"
-                            className="px-4 py-2 rounded-lg border focus:ring-2 focus:ring-slate-200 outline-none"
+                            className="px-4 py-2 bg-white rounded-lg border-2 border-slate-200 text-slate-900 focus:ring-2 focus:ring-slate-200 outline-none placeholder:text-slate-400 font-medium"
                             value={newCode}
                             onChange={e => setNewCode(e.target.value)}
                         />

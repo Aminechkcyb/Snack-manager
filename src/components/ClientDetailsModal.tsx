@@ -20,7 +20,7 @@ export function ClientDetailsModal({ phoneNumber, onClose, getHistory }: ClientD
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in">
             <div className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95">
                 <div className="p-6 border-b flex items-center justify-between bg-slate-50">
-                    <h3 className="text-xl font-bold flex items-center gap-2">
+                    <h3 className="text-xl font-bold flex items-center gap-2 text-slate-900">
                         <User className={cn("h-5 w-5", currentTheme.solidText)} />
                         Fiche Client
                     </h3>
@@ -41,23 +41,25 @@ export function ClientDetailsModal({ phoneNumber, onClose, getHistory }: ClientD
                         </div>
                         <div className="flex flex-col items-end gap-2">
                             {/* Loyalty Badge */}
-                            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-yellow-50 border border-yellow-100 rounded-lg shadow-sm">
-                                <div className="flex gap-0.5">
-                                    {Array.from({ length: Math.min(5, Math.floor(history.length / (settings.loyaltyTarget || 10))) }).map((_, i) => (
-                                        <Star key={i} className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-                                    ))}
-                                    {Math.floor(history.length / (settings.loyaltyTarget || 10)) === 0 && (
-                                        <Star className="h-4 w-4 text-slate-300" />
-                                    )}
+                            {settings.enableLoyalty && (
+                                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-yellow-50 border border-yellow-100 rounded-lg shadow-sm">
+                                    <div className="flex gap-0.5">
+                                        {Array.from({ length: Math.min(5, Math.floor(history.length / (settings.loyaltyTarget || 10))) }).map((_, i) => (
+                                            <Star key={i} className="h-4 w-4 text-yellow-500 fill-yellow-500" />
+                                        ))}
+                                        {Math.floor(history.length / (settings.loyaltyTarget || 10)) === 0 && (
+                                            <Star className="h-4 w-4 text-slate-300" />
+                                        )}
+                                    </div>
+                                    <span className="text-xs font-bold text-yellow-700">
+                                        {Math.floor(history.length / (settings.loyaltyTarget || 10))} Étoile(s)
+                                    </span>
                                 </div>
-                                <span className="text-xs font-bold text-yellow-700">
-                                    {Math.floor(history.length / (settings.loyaltyTarget || 10))} Étoile(s)
-                                </span>
-                            </div>
+                            )}
 
                             <div className="text-right">
                                 <div className="text-sm text-slate-500 uppercase font-bold">Total Dépensé</div>
-                                <div className={cn("text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r", currentTheme.gradient)}>{formatPrice(totalSpent)}</div>
+                                <div className={cn("text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r", currentTheme.gradient)}>{formatPrice(totalSpent)}</div>
                                 <div className="text-sm text-slate-500 bg-slate-100 px-2 py-1 rounded-full inline-block mt-1">
                                     {history.length} commandes au total
                                 </div>
