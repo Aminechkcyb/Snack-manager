@@ -118,8 +118,8 @@ export default function HistoryPage() {
             <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-2 text-xs font-bold uppercase text-slate-500">
                 <div className="col-span-2">Commande</div>
                 <div className="col-span-3">Client</div>
-                <div className="col-span-3">Articles</div>
                 <div className="col-span-2">Date</div>
+                <div className="col-span-3">Articles</div>
                 <div className="col-span-1 text-center">Montant</div>
                 <div className="col-span-1 text-right">Actions</div>
             </div>
@@ -192,7 +192,15 @@ export default function HistoryPage() {
                                         </button>
                                     </div>
 
-                                    {/* Articles List (Restored) */}
+                                    {/* Date & Time (Swapped) */}
+                                    <div className="col-span-1 md:col-span-2 hidden md:block border-l md:pl-4">
+                                        <div className="flex flex-col">
+                                            <span className="text-sm font-medium text-slate-900">{order.date}</span>
+                                            <span className="text-xs text-slate-500">{order.timestamp}</span>
+                                        </div>
+                                    </div>
+
+                                    {/* Articles List (Swapped) */}
                                     <div className="col-span-1 md:col-span-3 hidden md:block">
                                         <div className="flex flex-wrap gap-1">
                                             {order.items.slice(0, 3).map((item, idx) => (
@@ -203,14 +211,6 @@ export default function HistoryPage() {
                                             {order.items.length > 3 && (
                                                 <span className="text-[10px] text-slate-400 pl-1">+{order.items.length - 3} autres</span>
                                             )}
-                                        </div>
-                                    </div>
-
-                                    {/* Date & Time */}
-                                    <div className="col-span-1 md:col-span-2 hidden md:block">
-                                        <div className="flex flex-col">
-                                            <span className="text-sm font-medium text-slate-900">{order.date}</span>
-                                            <span className="text-xs text-slate-500">{order.timestamp}</span>
                                         </div>
                                     </div>
 
