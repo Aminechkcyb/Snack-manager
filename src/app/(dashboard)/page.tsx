@@ -34,7 +34,7 @@ export default function Dashboard() {
   const { orders, activeOrders, updateOrderStatus, updateOrderDetails, deleteOrder, getClientHistory, addOrder, playNotificationSound } = useOrders();
   const [isNewOrderOpen, setIsNewOrderOpen] = useState(false);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
-  const [animatingDeleteId, setAnimatingDeleteId] = useState<string | null>(null);
+  const [animatingExitId, setAnimatingExitId] = useState<string | null>(null);
   const [editingOrder, setEditingOrder] = useState<Order | null>(null);
   const { currentTheme, settings } = useAppSettings();
 
@@ -56,6 +56,20 @@ export default function Dashboard() {
 
   const dailyTakeaway = dailyOrders.filter(o => o.type === "emporter").length;
   const dailyDelivery = dailyOrders.filter(o => o.type === "livraison").length;
+
+  // Handle status change with animation for exit states
+  const handleStatusChange = (orderId: string, newStatus: OrderStatus) => {
+    if (newStatus === "termine" || newStatus === "annule") {
+      setAnimatingExitId(orderId);
+      // Wait for animation to finish before actual status update
+      setTimeout(() => {
+        updateOrderStatus(orderId, newStatus);
+        setAnimatingExitId(null);
+      }, 500);
+    } else {
+      updateOrderStatus(orderId, newStatus);
+    }
+  };
 
   return (
     <div className="space-y-8">
@@ -229,7 +243,9 @@ export default function Dashboard() {
                     borderColor,
                     bgColor,
                     isPriority && "shadow-red-200 shadow-md ring-1 ring-red-400 animate-pulse",
-                    animatingDeleteId === order.id && "animate-trash-exit"
+                    bgColor,
+                    isPriority && "shadow-red-200 shadow-md ring-1 ring-red-400 animate-pulse",
+                    animatingExitId === order.id && "animate-trash-exit"
                   )}
                     style={isPriority ? {
                       animationDuration: '2s', // Slower pulse for better readability
@@ -301,7 +317,7 @@ export default function Dashboard() {
 
                         <StatusSelect
                           currentStatus={order.status}
-                          onStatusChange={(status) => updateOrderStatus(order.id, status)}
+                          onStatusChange={(status) => handleStatusChange(order.id, status)}
                         />
 
                         <button
@@ -360,13 +376,13 @@ export default function Dashboard() {
         onClose={() => setConfirmDeleteId(null)}
         onConfirm={() => {
           if (confirmDeleteId) {
-            setAnimatingDeleteId(confirmDeleteId);
+            setAnimatingExitId(confirmDeleteId);
             setConfirmDeleteId(null);
 
             // Wait for animation to finish before actual delete
             setTimeout(() => {
               deleteOrder(confirmDeleteId);
-              setAnimatingDeleteId(null);
+              setAnimatingExitId(null);
             }, 500);
           }
         }}
