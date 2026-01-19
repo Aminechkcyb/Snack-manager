@@ -114,135 +114,142 @@ export default function HistoryPage() {
                 </div>
             </div>
 
-            <div className="bg-white rounded-2xl border shadow-sm overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                    <thead>
-                        <tr className="bg-slate-50 border-b">
-                            <th className="px-6 py-4 text-xs font-bold uppercase text-slate-500">Commande</th>
-                            <th className="px-6 py-4 text-xs font-bold uppercase text-slate-500">Client</th>
-                            <th className="px-6 py-4 text-xs font-bold uppercase text-slate-500">Articles</th>
-                            <th className="px-6 py-4 text-xs font-bold uppercase text-slate-500">Date & Heure</th>
-                            <th className="px-6 py-4 text-xs font-bold uppercase text-slate-500 text-right">Montant</th>
-                            <th className="px-6 py-4 text-xs font-bold uppercase text-slate-500 text-right">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y">
-                        {filteredOrders.length === 0 ? (
-                            <tr>
-                                <td colSpan={6} className="p-12 text-center text-slate-500">
-                                    Aucune commande trouvée.
-                                </td>
-                            </tr>
-                        ) : (
-                            filteredOrders.map((order) => (
-                                <tr
-                                    key={order.id}
-                                    className={cn(
-                                        "hover:bg-slate-50 transition-colors group",
-                                        animatingDeleteId === order.id && "animate-trash-exit"
-                                    )}
-                                >
-                                    <td className="px-6 py-4">
+            {/* Desktop Headers (Hidden on Mobile) */}
+            <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-2 text-xs font-bold uppercase text-slate-500">
+                <div className="col-span-3">Commande</div>
+                <div className="col-span-3">Client</div>
+                <div className="col-span-2">Date</div>
+                <div className="col-span-2 text-center">Montant</div>
+                <div className="col-span-2 text-right">Actions</div>
+            </div>
+
+            <div className="space-y-4">
+                {filteredOrders.length === 0 ? (
+                    <div className="p-12 text-center text-slate-500 bg-white rounded-2xl border border-dashed">
+                        Aucune commande trouvée.
+                    </div>
+                ) : (
+                    filteredOrders.map((order) => {
+                        const borderColor = order.type === 'livraison' ? 'border-l-blue-500' :
+                            order.type === 'sur_place' ? 'border-l-purple-500' :
+                                'border-l-orange-500';
+
+                        return (
+                            <div
+                                key={order.id}
+                                className={cn(
+                                    "bg-white shadow-sm hover:shadow-md transition-all group rounded-xl border border-slate-200 border-l-[6px] p-4 md:p-0",
+                                    borderColor,
+                                    animatingDeleteId === order.id && "animate-trash-exit"
+                                )}
+                            >
+                                <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center md:h-20">
+
+                                    {/* Mobile Top Row: ID + Status + Type */}
+                                    <div className="col-span-1 md:col-span-3 md:pl-6 flex items-center justify-between md:justify-start gap-4">
                                         <div className="flex items-center gap-3">
                                             <div className={cn(
-                                                "h-8 w-8 rounded-lg flex items-center justify-center shrink-0",
+                                                "h-10 w-10 md:h-8 md:w-8 rounded-lg flex items-center justify-center shrink-0",
                                                 order.type === "livraison" ? "bg-blue-50 text-blue-600" :
                                                     order.type === "sur_place" ? "bg-purple-50 text-purple-600" :
                                                         "bg-orange-50 text-orange-600"
                                             )}>
-                                                {order.type === "livraison" ? <Truck className="h-4 w-4" /> :
-                                                    order.type === "sur_place" ? <Utensils className="h-4 w-4" /> :
-                                                        <ShoppingBag className="h-4 w-4" />}
+                                                {order.type === "livraison" ? <Truck className="h-5 w-5 md:h-4 md:w-4" /> :
+                                                    order.type === "sur_place" ? <Utensils className="h-5 w-5 md:h-4 md:w-4" /> :
+                                                        <ShoppingBag className="h-5 w-5 md:h-4 md:w-4" />}
                                             </div>
                                             <div>
                                                 <div className="font-mono text-sm font-medium text-slate-600">#{order.id}</div>
-                                                <div className="flex gap-1 mt-1">
+                                                <div className="flex gap-1 mt-1 md:hidden lg:flex">
                                                     <div className={cn(
                                                         "text-[10px] uppercase font-bold px-1.5 py-0.5 rounded w-fit",
                                                         order.status === "termine" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
                                                     )}>
                                                         {order.status}
                                                     </div>
-                                                    <div className={cn(
-                                                        "text-[10px] uppercase font-bold px-1.5 py-0.5 rounded w-fit border",
-                                                        order.type === "livraison" ? "bg-blue-50 text-blue-600 border-blue-100" :
-                                                            order.type === "sur_place" ? "bg-purple-50 text-purple-600 border-purple-100" :
-                                                                "bg-orange-50 text-orange-600 border-orange-100"
-                                                    )}>
-                                                        {order.type === "sur_place" ? "Sur Place" : order.type === "livraison" ? "Livraison" : "Emporter"}
-                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center justify-between">
-                                            <div>
-                                                <div className="font-bold text-slate-900">{order.customerName}</div>
-                                                <div className="text-xs text-slate-500">{order.phoneNumber}</div>
-                                            </div>
-                                            <button
-                                                onClick={() => setSelectedClientPhone(order.phoneNumber)}
-                                                className={cn("p-2 bg-slate-100 rounded-lg transition-all text-slate-600", `hover:${currentTheme.lightBg} hover:${currentTheme.solidText}`)}
-                                                title="Voir fiche client"
-                                            >
-                                                <User className="h-4 w-4" />
-                                            </button>
+                                        {/* Mobile Price Display (Right aligned) */}
+                                        <div className="md:hidden font-bold text-lg text-slate-900">
+                                            {formatPrice(order.totalPrice)}
                                         </div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="flex flex-col gap-1 max-w-[200px]">
-                                            {order.items.slice(0, 3).map((item, idx) => (
-                                                <div key={idx} className="text-xs text-slate-600 truncate">
-                                                    <span className="font-bold text-slate-900">{item.quantity}x</span> {item.name}
-                                                </div>
-                                            ))}
-                                            {order.items.length > 3 && (
-                                                <div className="text-xs text-slate-400 italic">
-                                                    +{order.items.length - 3} autres...
-                                                </div>
-                                            )}
+                                    </div>
+
+                                    {/* Client Info */}
+                                    <div className="col-span-1 md:col-span-3 flex items-center justify-between md:justify-start gap-4">
+                                        <div>
+                                            <div className="font-bold text-slate-900">{order.customerName}</div>
+                                            <div className="text-xs text-slate-500">{order.phoneNumber}</div>
                                         </div>
-                                    </td>
-                                    <td className="px-6 py-4">
+                                        <button
+                                            onClick={() => setSelectedClientPhone(order.phoneNumber)}
+                                            className={cn("p-2 bg-slate-100 rounded-lg transition-all text-slate-600 md:opacity-0 group-hover:opacity-100", `hover:${currentTheme.lightBg} hover:${currentTheme.solidText}`)}
+                                            title="Voir fiche client"
+                                        >
+                                            <User className="h-4 w-4" />
+                                        </button>
+                                    </div>
+
+                                    {/* Items Summary (Hidden on mobile to save space, or shown simplified) */}
+                                    <div className="col-span-1 md:col-span-2 hidden md:block">
                                         <div className="flex flex-col">
                                             <span className="text-sm font-medium text-slate-900">{order.date}</span>
                                             <span className="text-xs text-slate-500">{order.timestamp}</span>
                                         </div>
-                                    </td>
-                                    <td className="px-6 py-4 text-right">
-                                        <span className={cn("font-bold", currentTheme.solidText)}>{formatPrice(order.totalPrice)}</span>
-                                    </td>
-                                    <td className="px-6 py-4 text-right">
-                                        <div className="flex items-center justify-end gap-2">
+                                    </div>
+
+                                    {/* Desktop Price - Centered */}
+                                    <div className="hidden md:flex md:col-span-2 items-center justify-center">
+                                        <div className={cn("font-bold", currentTheme.solidText)}>{formatPrice(order.totalPrice)}</div>
+                                    </div>
+
+                                    {/* Actions */}
+                                    <div className="col-span-1 md:col-span-2 flex items-center justify-end md:pr-6">
+                                        <div className="flex items-center gap-2 w-full md:w-auto justify-end border-t md:border-t-0 pt-4 md:pt-0 mt-2 md:mt-0">
                                             <button
-                                                onClick={() => setEditingOrder(order)} // Add click handler
+                                                onClick={() => setEditingOrder(order)}
                                                 className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
                                                 title="Modifier"
                                             >
-                                                <Pencil className="h-4 w-4" />
+                                                <Pencil className="h-5 w-5 md:h-4 md:w-4" />
                                             </button>
                                             <button
                                                 onClick={() => printOrder(order, settings)}
-                                                className="p-2 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
-                                                title="Imprimer le ticket"
+                                                className="p-2 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors border md:border-0"
+                                                title="Imprimer"
                                             >
-                                                <Printer className="h-4 w-4" />
+                                                <Printer className="h-5 w-5 md:h-4 md:w-4" />
                                             </button>
                                             <button
                                                 onClick={() => setConfirmDeleteId(order.id)}
                                                 className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                                                 title="Supprimer"
                                             >
-                                                <Trash2 className="h-4 w-4" />
+                                                <Trash2 className="h-5 w-5 md:h-4 md:w-4" />
                                             </button>
                                         </div>
-                                    </td>
-                                </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
+                                    </div>
+                                </div>
+
+                                {/* Mobile Items List (Accordion style potentially, but list for now) */}
+                                <div className="mt-3 pt-3 border-t border-dashed md:hidden">
+                                    <div className="text-xs text-slate-500 mb-1 flex justify-between">
+                                        <span>{order.date} à {order.timestamp}</span>
+                                        <span className="uppercase font-bold text-[10px]">{order.type.replace('_', ' ')}</span>
+                                    </div>
+                                    <div className="flex flex-wrap gap-2">
+                                        {order.items.map((item, idx) => (
+                                            <span key={idx} className="inline-flex items-center gap-1 bg-slate-50 px-2 py-1 rounded text-xs text-slate-700 border">
+                                                <span className="font-bold">{item.quantity}x</span> {item.name}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })
+                )}
             </div>
 
             {selectedClientPhone && (

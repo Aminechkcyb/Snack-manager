@@ -176,9 +176,9 @@ export default function Dashboard() {
           <h2 className="text-lg font-bold text-slate-900">Commandes en cours</h2>
         </div>
 
-        <div className="divide-y overflow-x-auto">
+        <div className="space-y-4 p-4 overflow-x-auto">
           {activeOrders.length === 0 ? (
-            <div className="p-12 text-center text-slate-500">
+            <div className="p-12 text-center text-slate-500 bg-slate-50 rounded-xl border border-dashed">
               Aucune commande en cours.
             </div>
           ) : (
@@ -186,8 +186,6 @@ export default function Dashboard() {
               .sort((a, b) => {
                 // Custom Date Parser for "18 Jan 2026" + "19:55"
                 const parseOrderDate = (o: Order) => {
-                  // Hacky parser for the specific format "DD MMM YYYY"
-                  // Ideally use dayjs or date-fns but native is fine if robust
                   return new Date(`${o.date} ${o.timestamp}`);
                 };
 
@@ -216,12 +214,21 @@ export default function Dashboard() {
                 const waitTime = Math.floor((new Date().getTime() - orderDate.getTime()) / (1000 * 60));
                 const isPriority = waitTime >= 15;
 
+                // Determine border color based on Type
+                const borderColor = order.type === 'livraison' ? 'border-blue-500' :
+                  order.type === 'sur_place' ? 'border-purple-500' :
+                    'border-orange-500';
+
+                const bgColor = order.type === 'livraison' ? 'bg-blue-50/30' :
+                  order.type === 'sur_place' ? 'bg-purple-50/30' :
+                    'bg-orange-50/30';
+
                 return (
                   <div key={order.id} className={cn(
-                    "p-6 transition-all group border-l-[6px] relative",
-                    isPriority
-                      ? "bg-red-50 border-red-600 shadow-red-100 animate-pulse"
-                      : "hover:bg-slate-50 border-transparent",
+                    "p-6 transition-all group border-l-[8px] rounded-xl border shadow-sm relative mb-4",
+                    borderColor,
+                    bgColor,
+                    isPriority && "shadow-red-200 shadow-md ring-1 ring-red-400 animate-pulse",
                     animatingDeleteId === order.id && "animate-trash-exit"
                   )}
                     style={isPriority ? {
