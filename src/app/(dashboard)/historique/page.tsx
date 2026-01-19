@@ -184,7 +184,7 @@ export default function HistoryPage() {
                                         </div>
                                         <button
                                             onClick={() => setSelectedClientPhone(order.phoneNumber)}
-                                            className={cn("p-2 bg-slate-100 rounded-lg transition-all text-slate-600 md:opacity-0 group-hover:opacity-100", `hover:${currentTheme.lightBg} hover:${currentTheme.solidText}`)}
+                                            className={cn("p-2 bg-slate-100 rounded-lg transition-all text-slate-600 hover:text-slate-900", `hover:${currentTheme.lightBg} hover:${currentTheme.solidText}`)}
                                             title="Voir fiche client"
                                         >
                                             <User className="h-4 w-4" />
@@ -201,7 +201,9 @@ export default function HistoryPage() {
 
                                     {/* Desktop Price - Centered */}
                                     <div className="hidden md:flex md:col-span-2 items-center justify-center">
-                                        <div className={cn("font-bold", currentTheme.solidText)}>{formatPrice(order.totalPrice)}</div>
+                                        <div className={cn("font-bold text-lg bg-gradient-to-r bg-clip-text text-transparent", currentTheme.gradient)}>
+                                            {formatPrice(order.totalPrice)}
+                                        </div>
                                     </div>
 
                                     {/* Actions */}
