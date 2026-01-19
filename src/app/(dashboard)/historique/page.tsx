@@ -116,11 +116,12 @@ export default function HistoryPage() {
 
             {/* Desktop Headers (Hidden on Mobile) */}
             <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-2 text-xs font-bold uppercase text-slate-500">
-                <div className="col-span-3">Commande</div>
+                <div className="col-span-2">Commande</div>
                 <div className="col-span-3">Client</div>
+                <div className="col-span-3">Articles</div>
                 <div className="col-span-2">Date</div>
-                <div className="col-span-2 text-center">Montant</div>
-                <div className="col-span-2 text-right">Actions</div>
+                <div className="col-span-1 text-center">Montant</div>
+                <div className="col-span-1 text-right">Actions</div>
             </div>
 
             <div className="space-y-4">
@@ -146,7 +147,7 @@ export default function HistoryPage() {
                                 <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center md:h-20">
 
                                     {/* Mobile Top Row: ID + Status + Type */}
-                                    <div className="col-span-1 md:col-span-3 md:pl-6 flex items-center justify-between md:justify-start gap-4">
+                                    <div className="col-span-1 md:col-span-2 md:pl-6 flex items-center justify-between md:justify-start gap-4">
                                         <div className="flex items-center gap-3">
                                             <div className={cn(
                                                 "h-10 w-10 md:h-8 md:w-8 rounded-lg flex items-center justify-center shrink-0",
@@ -177,9 +178,9 @@ export default function HistoryPage() {
                                     </div>
 
                                     {/* Client Info */}
-                                    <div className="col-span-1 md:col-span-3 flex items-center justify-between md:justify-start gap-4">
+                                    <div className="col-span-1 md:col-span-3 flex items-center justify-between md:justify-start gap-4 md:border-l md:pl-4">
                                         <div>
-                                            <div className="font-bold text-slate-900">{order.customerName}</div>
+                                            <div className="font-bold text-slate-900 truncate max-w-[120px]">{order.customerName}</div>
                                             <div className="text-xs text-slate-500">{order.phoneNumber}</div>
                                         </div>
                                         <button
@@ -191,7 +192,21 @@ export default function HistoryPage() {
                                         </button>
                                     </div>
 
-                                    {/* Items Summary (Hidden on mobile to save space, or shown simplified) */}
+                                    {/* Articles List (Restored) */}
+                                    <div className="col-span-1 md:col-span-3 hidden md:block">
+                                        <div className="flex flex-wrap gap-1">
+                                            {order.items.slice(0, 3).map((item, idx) => (
+                                                <span key={idx} className="inline-flex items-center text-[10px] bg-slate-50 border border-slate-200 px-1.5 py-0.5 rounded text-slate-600">
+                                                    <span className="font-bold mr-1">{item.quantity}x</span> {item.name}
+                                                </span>
+                                            ))}
+                                            {order.items.length > 3 && (
+                                                <span className="text-[10px] text-slate-400 pl-1">+{order.items.length - 3} autres</span>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Date & Time */}
                                     <div className="col-span-1 md:col-span-2 hidden md:block">
                                         <div className="flex flex-col">
                                             <span className="text-sm font-medium text-slate-900">{order.date}</span>
@@ -200,14 +215,14 @@ export default function HistoryPage() {
                                     </div>
 
                                     {/* Desktop Price - Centered */}
-                                    <div className="hidden md:flex md:col-span-2 items-center justify-center">
-                                        <div className={cn("font-bold text-lg bg-gradient-to-r bg-clip-text text-transparent", currentTheme.gradient)}>
+                                    <div className="hidden md:flex md:col-span-1 items-center justify-center">
+                                        <div className={cn("font-bold text-sm bg-gradient-to-r bg-clip-text text-transparent", currentTheme.gradient)}>
                                             {formatPrice(order.totalPrice)}
                                         </div>
                                     </div>
 
                                     {/* Actions */}
-                                    <div className="col-span-1 md:col-span-2 flex items-center justify-end md:pr-6">
+                                    <div className="col-span-1 md:col-span-1 flex items-center justify-end md:pr-6">
                                         <div className="flex items-center gap-2 w-full md:w-auto justify-end border-t md:border-t-0 pt-4 md:pt-0 mt-2 md:mt-0">
                                             <button
                                                 onClick={() => setEditingOrder(order)}
