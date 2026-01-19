@@ -189,12 +189,12 @@ export function useOrders() {
     const [isLoaded, setIsLoaded] = useState(false);
 
     useEffect(() => {
-        const saved = localStorage.getItem("snackOrders_v7");
+        const saved = localStorage.getItem("snackOrders_v8");
         if (saved) {
             setOrders(JSON.parse(saved));
         } else {
             setOrders(INITIAL_ORDERS);
-            localStorage.setItem("snackOrders_v5", JSON.stringify(INITIAL_ORDERS));
+            localStorage.setItem("snackOrders_v8", JSON.stringify(INITIAL_ORDERS));
         }
         setIsLoaded(true);
     }, []);
