@@ -255,7 +255,7 @@ export default function Dashboard() {
                     {/* Grid layout for consistent alignment */}
                     <div className="grid grid-cols-12 gap-4 items-center">
                       {/* Icon + Name + Phone/Time - 5 columns */}
-                      <div className="col-span-12 md:col-span-5 flex gap-4 items-center">
+                      <div className="col-span-12 xl:col-span-5 flex gap-4 items-center">
                         <div className={cn(
                           "relative h-12 w-12 rounded-xl flex items-center justify-center shrink-0",
                           isPriority ? "bg-red-100 text-red-600" :
@@ -296,7 +296,7 @@ export default function Dashboard() {
                       </div>
 
                       {/* Items - 4 columns */}
-                      <div className="col-span-12 md:col-span-4">
+                      <div className="col-span-12 xl:col-span-4">
                         <p className="text-sm font-medium text-slate-700 line-clamp-2">
                           {order.items.map(i => `${i.quantity}x ${i.name}`).join(", ")}
                         </p>
@@ -309,7 +309,7 @@ export default function Dashboard() {
                       </div>
 
                       {/* Price + Status - 3 columns */}
-                      <div className="col-span-12 md:col-span-3 flex items-center justify-between md:justify-end gap-3">
+                      <div className="col-span-12 xl:col-span-3 flex items-center justify-between xl:justify-end gap-3">
                         <div className="text-right min-w-[80px]">
                           <div className={cn("text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r", currentTheme.gradient)}>{formatPrice(order.totalPrice)}</div>
                           <div className="text-[10px] text-slate-500 uppercase font-semibold tracking-wide">{order.type}</div>
