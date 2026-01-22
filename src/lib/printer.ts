@@ -24,22 +24,23 @@ export const printOrder = (order: Order, settings: AppSettings) => {
             }
             body {
                 font-family: 'Courier New', monospace;
-                width: 74mm; /* Safer printable width for 80mm paper (leaving ~3mm margins) */
-                margin: 0 auto; /* Center on the page */
-                padding: 5px; /* Minimal padding */
+                width: 72mm; /* Slightly narrower to strictly ensure centering */
+                margin: 0 auto;
+                padding: 10px 0;
                 color: black;
                 background: white;
-                font-size: 16px; /* Increased from 14px */
+                font-size: 18px; /* Huge readability */
                 line-height: 1.3;
+                text-align: center; /* Default center alignment for everything except table */
             }
             .header {
                 text-align: center;
                 margin-bottom: 20px;
-                border-bottom: 2px dashed black;
+                border-bottom: 3px dashed black;
                 padding-bottom: 15px;
             }
             .header h1 {
-                font-size: 32px; /* Increased from 24px */
+                font-size: 36px;
                 margin: 0;
                 text-transform: uppercase;
                 font-weight: 900;
@@ -47,80 +48,85 @@ export const printOrder = (order: Order, settings: AppSettings) => {
             }
             .header p {
                 margin: 5px 0 0 0;
-                font-size: 14px; /* Increased from 12px */
+                font-size: 16px;
             }
             .order-info {
+                text-align: left; /* Keep info readable */
                 margin-bottom: 20px;
-                font-size: 16px; /* Increased from 14px */
+                font-size: 18px;
             }
             .order-info strong {
                 font-weight: 900;
-                font-size: 20px; /* Increased from 16px */
+                font-size: 22px;
                 display: block;
                 margin-bottom: 5px;
             }
             .type-badge {
                 text-align: center;
-                font-size: 26px; /* Increased from 20px */
-                font-weight: bold;
-                border: 3px solid black;
-                padding: 8px;
-                margin: 15px 0;
+                font-size: 28px;
+                font-weight: 900;
+                border: 4px solid black;
+                padding: 10px;
+                margin: 20px 0;
                 text-transform: uppercase;
             }
             table {
                 width: 100%;
                 border-collapse: collapse;
                 margin-bottom: 20px;
-                font-size: 16px; /* Explicit table font size */
+                font-size: 18px; 
+                text-align: left; /* Table stays structured */
             }
             th {
                 text-align: left;
-                border-bottom: 2px solid black;
+                border-bottom: 3px solid black;
                 padding-bottom: 8px;
-                font-size: 16px;
+                font-size: 18px;
+                font-weight: 900;
             }
             td {
-                padding: 8px 0;
+                padding: 10px 0;
                 vertical-align: top;
             }
             .qty {
                 width: 15%;
-                font-weight: bold;
-                font-size: 18px; /* Larger quantity */
+                font-weight: 900;
+                font-size: 20px;
             }
             .item {
-                width: 60%;
-            }
-            .price {
-                width: 25%;
-                text-align: right;
+                width: 55%;
                 font-weight: bold;
             }
+            .price {
+                width: 30%;
+                text-align: right;
+                font-weight: 900;
+                font-size: 20px;
+            }
             .total-section {
-                border-top: 3px dashed black;
+                border-top: 4px dashed black;
                 padding-top: 15px;
                 margin-top: 15px;
                 text-align: right;
             }
             .total-line {
-                font-size: 26px; /* Increased from 18px */
+                font-size: 32px;
                 font-weight: 900;
                 margin-top: 5px;
             }
             .footer {
                 text-align: center;
                 margin-top: 40px;
-                font-size: 14px; /* Increased from 12px */
-                border-top: 1px solid black;
+                font-size: 16px;
+                border-top: 2px solid black;
                 padding-top: 15px;
-                font-style: italic;
+                font-weight: bold;
             }
             .cut-line {
-                border-bottom: 1px dashed black;
-                margin-top: 30px;
+                border-bottom: 2px dashed black;
+                margin-top: 40px;
                 text-align: center;
-                font-size: 12px;
+                font-size: 14px;
                 padding-bottom: 5px;
             }
         </style>
