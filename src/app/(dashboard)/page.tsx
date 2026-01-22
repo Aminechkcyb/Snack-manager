@@ -46,16 +46,9 @@ export default function Dashboard() {
   // Actually, let's just count *all* active/recent orders to ensure data shows up for the user demo,
   // since their mock data is hardcoded to "18 Jan 2026".
 
-  const dailyOrders = orders.filter(o => {
-    // In a real app, use proper date objects. Here we assume the mock data "18 Jan 2026" is 'today' for the demo context.
-    // If we used real dynamic dates, filtering strictly by todayStr might hide the hardcoded mock data.
-    // Let's rely on the mock data being "active" or "today". 
-    // User asked "sur la journée". 
-    return o.date.includes("2026"); // Loose filter for demo, or match 'today' if we want strictness.
-  });
-
-  const dailyTakeaway = dailyOrders.filter(o => o.type === "emporter").length;
-  const dailyDelivery = dailyOrders.filter(o => o.type === "livraison").length;
+  // Changed to use activeOrders as requested by user to show "commandes en cours" status
+  const dailyTakeaway = activeOrders.filter(o => o.type === "emporter").length;
+  const dailyDelivery = activeOrders.filter(o => o.type === "livraison").length;
 
   // Handle status change with animation for exit states
   const handleStatusChange = (orderId: string, newStatus: OrderStatus) => {
@@ -163,7 +156,7 @@ export default function Dashboard() {
             <div className="flex items-baseline gap-2">
               <span className={cn("text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r tracking-tight", currentTheme.gradient)}>{dailyDelivery}</span>
               <span className={cn("text-sm font-bold px-2.5 py-1 rounded-full border", currentTheme.solidText, currentTheme.lightBg, currentTheme.borderColor)}>
-                Aujourd'hui
+                En cours
               </span>
             </div>
 
@@ -208,25 +201,33 @@ export default function Dashboard() {
 
                 const now = new Date();
                 // @ts-ignore
-                const waitA = (now - dateA) / (1000 * 60);
+                const waitA = Math.floor((now - dateA) / (1000 * 60));
                 // @ts-ignore
-                const waitB = (now - dateB) / (1000 * 60);
+                const waitB = Math.floor((now - dateB) / (1000 * 60));
 
-                const isPriorityA = waitA >= 15;
-                const isPriorityB = waitB >= 15;
+                // Mock Demo Logic: Cycle 0-15 mins
+                const displayWaitA = waitA % 15;
+                const displayWaitB = waitB % 15;
+
+                const isPriorityA = displayWaitA >= 10;
+                const isPriorityB = displayWaitB >= 10;
 
                 // 1. Priority First
                 if (isPriorityA && !isPriorityB) return -1;
                 if (!isPriorityA && isPriorityB) return 1;
 
                 // 2. Then Longest Wait First (within same priority group)
-                return dateA.getTime() - dateB.getTime();
+                // Use the cycle time for sorting too so it looks consistent
+                return displayWaitB - displayWaitA;
               })
               .map((order) => {
                 // Calculate wait time for display
                 const orderDate = new Date(`${order.date} ${order.timestamp}`);
-                const waitTime = Math.floor((new Date().getTime() - orderDate.getTime()) / (1000 * 60));
-                const isPriority = waitTime >= 15;
+                const totalMinutes = Math.floor((new Date().getTime() - orderDate.getTime()) / (1000 * 60));
+
+                // Mock Demo Logic: Reset every 15 mins, Urgent at 10
+                const waitTime = totalMinutes % 15;
+                const isPriority = waitTime >= 10;
 
                 // Determine border color based on Type
                 const borderColor = order.type === 'livraison' ? 'border-blue-500' :

@@ -30,92 +30,85 @@ import { useState, useMemo } from "react";
 import { useAppSettings } from "@/contexts/SettingsContext"; // Import theme context
 import { cn } from "@/lib/utils";
 
-// Mock Data
+// Mock Data - Adjusted to 500-700€ per day as requested
 const weeklyData = [
-    { name: "Lun", revenue: 1200 },
-    { name: "Mar", revenue: 1900 },
-    { name: "Mer", revenue: 1500 },
-    { name: "Jeu", revenue: 2100 },
-    { name: "Ven", revenue: 2800 },
-    { name: "Sam", revenue: 3500 },
-    { name: "Dim", revenue: 3200 },
+    { name: "Lun", revenue: 520 },
+    { name: "Mar", revenue: 610 },
+    { name: "Mer", revenue: 550 },
+    { name: "Jeu", revenue: 680 },
+    { name: "Ven", revenue: 700 },
+    { name: "Sam", revenue: 650 },
+    { name: "Dim", revenue: 580 },
 ];
 
 const monthlyData = [
-    { name: "Sem 1", revenue: 9500 },
-    { name: "Sem 2", revenue: 11200 },
-    { name: "Sem 3", revenue: 8900 },
-    { name: "Sem 4", revenue: 12500 },
+    { name: "Sem 1", revenue: 3800 },
+    { name: "Sem 2", revenue: 4200 },
+    { name: "Sem 3", revenue: 3900 },
+    { name: "Sem 4", revenue: 4500 },
 ];
 
-const yearlyData = [
-    { name: "Jan", revenue: 35000 },
-    { name: "Fév", revenue: 32000 },
-    { name: "Mar", revenue: 41000 },
-    { name: "Avr", revenue: 38000 },
-    { name: "Mai", revenue: 45000 },
-    { name: "Juin", revenue: 48000 },
-    { name: "Juil", revenue: 52000 },
-    { name: "Août", revenue: 49000 },
-    { name: "Sep", revenue: 43000 },
-    { name: "Oct", revenue: 46000 },
-    { name: "Nov", revenue: 39000 },
-    { name: "Déc", revenue: 55000 },
+const yearlyData = [ // Année 2025
+    { name: "Jan", revenue: 17500 }, // ~564/j
+    { name: "Fév", revenue: 16800 }, // ~600/j
+    { name: "Mar", revenue: 18900 }, // ~610/j
+    { name: "Avr", revenue: 17500 },
+    { name: "Mai", revenue: 19200 },
+    { name: "Juin", revenue: 20500 }, // ~680/j - Good month
+    { name: "Juil", revenue: 21700 }, // ~700/j - Peak season
+    { name: "Août", revenue: 20100 },
+    { name: "Sep", revenue: 18000 },
+    { name: "Oct", revenue: 18600 },
+    { name: "Nov", revenue: 16500 },
+    { name: "Déc", revenue: 22000 }, // Holiday peak
 ];
 
-const weeklyDataPrevious = [
-    { name: "Lun", revenue: 1000 },
-    { name: "Mar", revenue: 1600 },
-    { name: "Mer", revenue: 1400 },
-    { name: "Jeu", revenue: 1900 },
-    { name: "Ven", revenue: 2400 },
-    { name: "Sam", revenue: 3000 },
-    { name: "Dim", revenue: 2800 },
-];
-
-const monthlyDataPrevious = [
-    { name: "Sem 1", revenue: 8000 },
-    { name: "Sem 2", revenue: 9500 },
-    { name: "Sem 3", revenue: 8200 },
-    { name: "Sem 4", revenue: 11000 },
-];
-
-const yearlyDataPrevious = [ // 2025
-    { name: "Jan", revenue: 28000 },
-    { name: "Fév", revenue: 29000 },
-    { name: "Mar", revenue: 35000 },
-    { name: "Avr", revenue: 34000 },
-    { name: "Mai", revenue: 40000 },
-    { name: "Juin", revenue: 42000 },
-    { name: "Juil", revenue: 48000 },
-    { name: "Août", revenue: 45000 },
-    { name: "Sep", revenue: 40000 },
-    { name: "Oct", revenue: 42000 },
-    { name: "Nov", revenue: 38000 },
-    { name: "Déc", revenue: 50000 },
+const yearlyDataPrevious = [ // Année 2024
+    { name: "Jan", revenue: 15500 },
+    { name: "Fév", revenue: 14800 },
+    { name: "Mar", revenue: 16500 },
+    { name: "Avr", revenue: 15900 },
+    { name: "Mai", revenue: 17500 },
+    { name: "Juin", revenue: 18100 },
+    { name: "Juil", revenue: 19500 },
+    { name: "Août", revenue: 17800 },
+    { name: "Sep", revenue: 16500 },
+    { name: "Oct", revenue: 17200 },
+    { name: "Nov", revenue: 15800 },
+    { name: "Déc", revenue: 20500 },
 ];
 
 type TimeRange = "week" | "month" | "year";
 
 export default function StatsPage() {
-    const { unavailableProducts, unavailableCount, isLoaded } = useProducts();
+    const { unavailableProducts, unavailableCount, isLoaded, products } = useProducts(); // Get products list
     const { orders } = useOrders(); // Get all orders
     const { currentTheme, settings } = useAppSettings();
 
     // Calculate Top Products
     const topProducts = useMemo(() => {
+        // Create a map of Product Name -> Category for fast lookup
+        const productCategoryMap = new Map<string, string>();
+        products.forEach(p => productCategoryMap.set(p.name, p.category));
+
         const productCounts: Record<string, { count: number; name: string; revenue: number }> = {};
 
         orders.forEach(order => {
             if (order.status === "annule") return;
             order.items.forEach(item => {
+                // Determine category from map, or guess 'Inconnu'
+                const category = productCategoryMap.get(item.name) || "";
+
+                // Filter Logic: Exclude 'Boissons' category OR explicit drink keywords if missing from map
+                const isDrink = category === "Boissons" ||
+                    ["coca", "fanta", "sprite", "eau", "pepsi", "7up", "oasis", "boisson", "jus"].some(k => item.name.toLowerCase().includes(k));
+
+                if (isDrink) return; // Skip drinks
+
                 if (!productCounts[item.name]) {
                     productCounts[item.name] = { count: 0, name: item.name, revenue: 0 };
                 }
                 productCounts[item.name].count += item.quantity;
-                // Estimate revenue per item if not available directly, or skip. 
-                // We don't have per-item price in OrderItem struct easily accessible here without lookup.
-                // For simplicity, we just count quantity.
             });
         });
 
@@ -144,8 +137,8 @@ export default function StatsPage() {
                 d.setDate(d.getDate() + i);
                 return {
                     name: d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' }),
-                    // Random revenue between 500 and 4000
-                    revenue: Math.floor(Math.random() * 3500) + 500
+                    // Random revenue between 500 and 700 as requested
+                    revenue: Math.floor(Math.random() * 200) + 500
                 };
             });
         }
@@ -157,11 +150,28 @@ export default function StatsPage() {
         }
     }, [timeRange, startDate, endDate]);
 
+    const weeklyDataPrevious = [
+        { name: "Lun", revenue: 480 },
+        { name: "Mar", revenue: 550 },
+        { name: "Mer", revenue: 510 },
+        { name: "Jeu", revenue: 600 },
+        { name: "Ven", revenue: 650 },
+        { name: "Sam", revenue: 620 },
+        { name: "Dim", revenue: 540 },
+    ];
+
+    const monthlyDataPrevious = [
+        { name: "Sem 1", revenue: 3500 },
+        { name: "Sem 2", revenue: 3800 },
+        { name: "Sem 3", revenue: 3600 },
+        { name: "Sem 4", revenue: 4100 },
+    ];
+
     // Calculate Growth
     const growthStats = useMemo(() => {
         if (timeRange === "custom") return null; // No comparison for custom yet
 
-        let previousData = [];
+        let previousData: { revenue: number }[] = [];
         switch (timeRange) {
             case "week": previousData = weeklyDataPrevious; break;
             case "month": previousData = monthlyDataPrevious; break;
@@ -183,15 +193,15 @@ export default function StatsPage() {
 
     // Hourly Data Logic
     const hourlyStats = useMemo(() => {
-        // Mock data for each day - Scaled closer to 1000 max as requested
+        // Mock data for each day - Reduced to meet user requirement (10-20 orders/hour)
         const hourlyDataByDay = {
-            lun: [250, 450, 680, 550, 300, 150, 250, 400, 750, 600, 450, 300, 150, 60, 20, 10, 5],
-            mar: [300, 550, 750, 600, 350, 180, 280, 450, 850, 680, 550, 380, 200, 90, 30, 10, 5],
-            mer: [350, 600, 850, 680, 450, 250, 300, 550, 900, 750, 600, 450, 250, 120, 60, 20, 10],
-            jeu: [300, 550, 720, 580, 320, 180, 280, 480, 880, 720, 580, 420, 220, 100, 40, 10, 5],
-            ven: [450, 750, 900, 750, 550, 300, 450, 750, 1200, 1000, 900, 750, 550, 350, 250, 150, 60],
-            sam: [550, 900, 1000, 850, 600, 350, 550, 900, 1350, 1200, 1000, 850, 600, 450, 300, 180, 90],
-            dim: [450, 850, 950, 780, 550, 300, 450, 850, 1250, 1150, 950, 780, 550, 400, 280, 150, 60],
+            lun: [2, 5, 12, 10, 5, 2, 4, 8, 15, 12, 8, 6, 4, 2, 1, 0, 0],
+            mar: [3, 6, 14, 11, 6, 3, 4, 9, 16, 13, 9, 7, 5, 2, 1, 0, 0],
+            mer: [3, 8, 16, 12, 7, 4, 6, 11, 18, 14, 10, 8, 6, 3, 1, 0, 0],
+            jeu: [3, 6, 13, 11, 6, 3, 5, 9, 16, 12, 8, 6, 4, 2, 1, 0, 0],
+            ven: [4, 10, 18, 15, 9, 5, 7, 13, 21, 18, 14, 12, 9, 5, 2, 1, 0],
+            sam: [5, 12, 21, 17, 10, 6, 9, 15, 23, 20, 16, 13, 9, 6, 3, 2, 0],
+            dim: [4, 9, 17, 14, 8, 5, 7, 12, 19, 16, 13, 10, 7, 4, 2, 1, 0],
         };
 
         const hours = ["11h", "12h", "13h", "14h", "15h", "16h", "17h", "18h", "19h", "20h", "21h", "22h", "23h", "00h", "01h", "02h", "03h"];
@@ -203,21 +213,13 @@ export default function StatsPage() {
             return allDays.reduce((sum, dayData) => sum + dayData[hourIdx], 0);
         });
 
-        let multiplier = 1;
-        // Logic: if week, we use the weeklySum (Total for the week)
-        // if month, approx 4.3 weeks
-        // if year, approx 52 weeks
-        // User wants to see total orders for the selected period
+        // We want to show "Average" orders per hour to keep numbers realistic (10-20 range)
+        // regardless of the period selected.
+        // If we sum up for a year, the "orders at 12h" would be huge (e.g. 5000), which confuses the user.
+        // So we divide by 7 to get the "Daily Average" profile.
+        const conversionFactor = 1 / 7;
 
-        switch (timeRange) {
-            case "week": multiplier = 1; break;
-            case "month": multiplier = 4.3; break;
-            case "year": multiplier = 52; break;
-            case "custom": multiplier = 1; break; // Simplified for custom
-            default: multiplier = 1;
-        }
-
-        const currentData = weeklySum.map(val => Math.round(val * multiplier));
+        const currentData = weeklySum.map(val => Math.round(val * conversionFactor));
 
         // Chart Data
         const chartData = hours.map((hour, i) => ({
@@ -300,15 +302,25 @@ export default function StatsPage() {
                 <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
                     <div className="flex items-center justify-between">
                         <div className={cn("p-2 rounded-lg", currentTheme.lightBg, currentTheme.solidText)}>
-                            <Users className="h-6 w-6" />
+                            <Package className="h-6 w-6" />
                         </div>
                         <span className={cn("text-xs font-bold px-2 py-1 rounded", currentTheme.lightBg, currentTheme.solidText)}>
-                            Optimal
+                            Moyenne
                         </span>
                     </div>
                     <div>
-                        <div className="text-slate-500 text-sm font-medium">Taux d'occupation</div>
-                        <div className="text-3xl font-bold text-slate-900">78%</div>
+                        <div className="text-slate-500 text-sm font-medium">Panier moyen</div>
+                        <div className="text-3xl font-bold text-slate-900">
+                            {(() => {
+                                // Filter strictly for History (Completed orders)
+                                const historyOrders = orders.filter(o => o.status === "termine");
+
+                                if (historyOrders.length === 0) return formatPrice(0); // Show 0 if no history yet
+
+                                const totalRev = historyOrders.reduce((sum, o) => sum + o.totalPrice, 0);
+                                return formatPrice(totalRev / historyOrders.length);
+                            })()}
+                        </div>
                     </div>
                 </div>
 
@@ -402,7 +414,8 @@ export default function StatsPage() {
                                     tickFormatter={(value) => `${value >= 1000 ? (value / 1000).toFixed(0) + 'k' : value}€`}
                                 />
                                 <Tooltip
-                                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', backgroundColor: '#fff', color: '#0f172a' }}
+                                    itemStyle={{ color: '#0f172a' }}
                                     formatter={(value: number | undefined) => [`${formatPrice(value || 0)}`, 'Revenu']}
                                 />
                                 <Area
@@ -547,7 +560,8 @@ export default function StatsPage() {
                                 tickFormatter={(value) => `${value}`}
                             />
                             <Tooltip
-                                contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                                contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', backgroundColor: '#fff', color: '#0f172a' }}
+                                itemStyle={{ color: '#0f172a' }}
                                 formatter={(value: number | undefined) => [`${value || 0} commandes`, 'Total']}
                             />
                             <Bar
@@ -571,11 +585,11 @@ export default function StatsPage() {
                         <div className={cn("text-xl font-bold", currentTheme.solidText)}>{hourlyStats.summary.maxOrders}</div>
                     </div>
                     <div className="text-center p-3 bg-slate-50 rounded-lg animate-in fade-in zoom-in duration-300 delay-100">
-                        <div className="text-xs text-slate-500 font-medium mb-1">Revenu du jour</div>
+                        <div className="text-xs text-slate-500 font-medium mb-1">Revenu {timeRange === 'week' ? 'hebdo' : timeRange === 'month' ? 'mensuel' : timeRange === 'year' ? 'annuel' : 'total'}</div>
                         <div className="text-xl font-bold text-slate-600">{hourlyStats.summary.revenue}</div>
                     </div>
                     <div className="text-center p-3 bg-slate-50 rounded-lg animate-in fade-in zoom-in duration-300 delay-150">
-                        <div className="text-xs text-slate-500 font-medium mb-1">Moyenne/heure</div>
+                        <div className="text-xs text-slate-500 font-medium mb-1">Commandes/h (en moyenne)</div>
                         <div className="text-xl font-bold text-slate-600">{hourlyStats.summary.avg}</div>
                     </div>
                 </div>

@@ -29,61 +29,65 @@ export const printOrder = (order: Order, settings: AppSettings) => {
                 padding: 10px;
                 color: black;
                 background: white;
-                font-size: 14px;
-                line-height: 1.2;
+                font-size: 16px; /* Increased from 14px */
+                line-height: 1.3;
             }
             .header {
                 text-align: center;
                 margin-bottom: 20px;
                 border-bottom: 2px dashed black;
-                padding-bottom: 10px;
+                padding-bottom: 15px;
             }
             .header h1 {
-                font-size: 24px;
+                font-size: 32px; /* Increased from 24px */
                 margin: 0;
                 text-transform: uppercase;
                 font-weight: 900;
+                line-height: 1.1;
             }
             .header p {
                 margin: 5px 0 0 0;
-                font-size: 12px;
+                font-size: 14px; /* Increased from 12px */
             }
             .order-info {
-                margin-bottom: 15px;
-                font-size: 14px;
+                margin-bottom: 20px;
+                font-size: 16px; /* Increased from 14px */
             }
             .order-info strong {
                 font-weight: 900;
-                font-size: 16px;
+                font-size: 20px; /* Increased from 16px */
                 display: block;
                 margin-bottom: 5px;
             }
             .type-badge {
                 text-align: center;
-                font-size: 20px;
+                font-size: 26px; /* Increased from 20px */
                 font-weight: bold;
-                border: 2px solid black;
-                padding: 5px;
-                margin: 10px 0;
+                border: 3px solid black;
+                padding: 8px;
+                margin: 15px 0;
                 text-transform: uppercase;
             }
             table {
                 width: 100%;
                 border-collapse: collapse;
-                margin-bottom: 15px;
+                margin-bottom: 20px;
+                font-size: 16px; /* Explicit table font size */
             }
             th {
                 text-align: left;
-                border-bottom: 1px solid black;
-                padding-bottom: 5px;
+                border-bottom: 2px solid black;
+                padding-bottom: 8px;
+                font-size: 16px;
             }
             td {
-                padding: 5px 0;
+                padding: 8px 0;
                 vertical-align: top;
             }
             .qty {
                 width: 15%;
                 font-weight: bold;
+                font-size: 18px; /* Larger quantity */
             }
             .item {
                 width: 60%;
@@ -91,30 +95,32 @@ export const printOrder = (order: Order, settings: AppSettings) => {
             .price {
                 width: 25%;
                 text-align: right;
+                font-weight: bold;
             }
             .total-section {
-                border-top: 2px dashed black;
-                padding-top: 10px;
-                margin-top: 10px;
+                border-top: 3px dashed black;
+                padding-top: 15px;
+                margin-top: 15px;
                 text-align: right;
             }
             .total-line {
-                font-size: 18px;
-                font-weight: bold;
+                font-size: 26px; /* Increased from 18px */
+                font-weight: 900;
                 margin-top: 5px;
             }
             .footer {
                 text-align: center;
-                margin-top: 30px;
-                font-size: 12px;
+                margin-top: 40px;
+                font-size: 14px; /* Increased from 12px */
                 border-top: 1px solid black;
-                padding-top: 10px;
+                padding-top: 15px;
+                font-style: italic;
             }
             .cut-line {
                 border-bottom: 1px dashed black;
-                margin-top: 20px;
+                margin-top: 30px;
                 text-align: center;
-                font-size: 10px;
+                font-size: 12px;
                 padding-bottom: 5px;
             }
         </style>
