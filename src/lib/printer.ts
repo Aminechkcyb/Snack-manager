@@ -24,14 +24,15 @@ export const printOrder = (order: Order, settings: AppSettings) => {
             }
             body {
                 font-family: 'Courier New', monospace;
-                width: 72mm; /* Slightly narrower to strictly ensure centering */
-                margin: 0 auto;
-                padding: 10px 0;
+                width: 100%; /* Use full width of the viewport/paper */
+                margin: 0;
+                padding: 5px;
+                box-sizing: border-box; /* Ensure padding is included in width */
                 color: black;
                 background: white;
-                font-size: 18px; /* Huge readability */
-                line-height: 1.3;
-                text-align: center; /* Default center alignment for everything except table */
+                font-size: 20px; /* Even bigger as requested */
+                line-height: 1.2;
+                text-align: center; /* Center everything by default */
             }
             .header {
                 text-align: center;
@@ -40,7 +41,7 @@ export const printOrder = (order: Order, settings: AppSettings) => {
                 padding-bottom: 15px;
             }
             .header h1 {
-                font-size: 36px;
+                font-size: 40px; /* Bigger title */
                 margin: 0;
                 text-transform: uppercase;
                 font-weight: 900;
@@ -48,22 +49,22 @@ export const printOrder = (order: Order, settings: AppSettings) => {
             }
             .header p {
                 margin: 5px 0 0 0;
-                font-size: 16px;
+                font-size: 18px; 
             }
             .order-info {
-                text-align: left; /* Keep info readable */
+                text-align: left; 
                 margin-bottom: 20px;
-                font-size: 18px;
+                font-size: 20px;
             }
             .order-info strong {
                 font-weight: 900;
-                font-size: 22px;
+                font-size: 24px;
                 display: block;
-                margin-bottom: 5px;
+                margin-bottom: 8px;
             }
             .type-badge {
                 text-align: center;
-                font-size: 28px;
+                font-size: 32px; /* Huge Badge */
                 font-weight: 900;
                 border: 4px solid black;
                 padding: 10px;
@@ -74,14 +75,14 @@ export const printOrder = (order: Order, settings: AppSettings) => {
                 width: 100%;
                 border-collapse: collapse;
                 margin-bottom: 20px;
-                font-size: 18px; 
-                text-align: left; /* Table stays structured */
+                font-size: 20px; 
+                text-align: left; 
             }
             th {
                 text-align: left;
                 border-bottom: 3px solid black;
                 padding-bottom: 8px;
-                font-size: 18px;
+                font-size: 20px;
                 font-weight: 900;
             }
             td {
@@ -91,17 +92,17 @@ export const printOrder = (order: Order, settings: AppSettings) => {
             .qty {
                 width: 15%;
                 font-weight: 900;
-                font-size: 20px;
+                font-size: 22px;
             }
             .item {
-                width: 55%;
+                width: 50%;
                 font-weight: bold;
             }
             .price {
-                width: 30%;
+                width: 35%;
                 text-align: right;
                 font-weight: 900;
-                font-size: 20px;
+                font-size: 22px;
             }
             .total-section {
                 border-top: 4px dashed black;
@@ -110,15 +111,15 @@ export const printOrder = (order: Order, settings: AppSettings) => {
                 text-align: right;
             }
             .total-line {
-                font-size: 32px;
+                font-size: 36px; /* Massive Total */
                 font-weight: 900;
                 margin-top: 5px;
             }
             .footer {
                 text-align: center;
                 margin-top: 40px;
-                font-size: 16px;
-                border-top: 2px solid black;
+                font-size: 18px;
+                border-top: 3px solid black;
                 padding-top: 15px;
                 font-weight: bold;
             }
