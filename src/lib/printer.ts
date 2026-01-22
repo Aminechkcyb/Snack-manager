@@ -24,9 +24,9 @@ export const printOrder = (order: Order, settings: AppSettings) => {
             }
             body {
                 font-family: 'Courier New', monospace;
-                width: 80mm;
-                margin: 0;
-                padding: 10px;
+                width: 74mm; /* Safer printable width for 80mm paper (leaving ~3mm margins) */
+                margin: 0 auto; /* Center on the page */
+                padding: 5px; /* Minimal padding */
                 color: black;
                 background: white;
                 font-size: 16px; /* Increased from 14px */
