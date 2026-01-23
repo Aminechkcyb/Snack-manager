@@ -185,9 +185,6 @@ export const printOrder = (order: Order, settings: AppSettings) => {
                 <div class="total-line">
                     TOTAL: ${order.totalPrice.toFixed(2).replace('.', ',')} €
                 </div>
-                <div style="font-size: 12px; margin-top: 5px;">
-                    Statut: ${order.status.toUpperCase()}
-                </div>
             </div>
 
             <div class="footer">
