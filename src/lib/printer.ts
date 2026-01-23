@@ -26,66 +26,66 @@ export const printOrder = (order: Order, settings: AppSettings) => {
                 font-family: 'Courier New', monospace;
                 width: 100%;
                 margin: 0;
-                padding: 5px;
+                padding: 5px 0; /* Minimal vertical padding */
                 box-sizing: border-box;
                 color: black;
                 background: white;
-                font-size: 14px; /* Standard receipt size */
-                line-height: 1.1; /* Tighter line height */
+                font-size: 16px; /* "Moyenne" - Sweet spot between 14px and 20px */
+                line-height: 1.15;
                 text-align: center;
             }
             .header {
                 text-align: center;
-                margin-bottom: 5px; /* Reduced specific spacing */
+                margin-bottom: 5px;
                 border-bottom: 2px solid black;
                 padding-bottom: 5px;
             }
             .header h1 {
-                font-size: 20px; /* Reduced title */
+                font-size: 22px; /* Balanced title */
                 margin: 0;
                 text-transform: uppercase;
                 font-weight: 900;
             }
             .header p {
                 margin: 2px 0 0 0;
-                font-size: 12px; 
+                font-size: 14px; 
             }
             .order-info {
                 text-align: left; 
-                margin-bottom: 10px;
-                font-size: 14px;
+                margin-bottom: 8px;
+                font-size: 16px;
             }
             .order-info strong {
                 font-weight: 900;
-                font-size: 16px;
+                font-size: 18px;
                 display: block;
                 margin-bottom: 2px;
             }
             .type-badge {
                 text-align: center;
-                font-size: 18px; /* Compact Badge */
+                font-size: 20px; /* Compact but visible */
                 font-weight: 900;
-                border: 2px solid black;
+                border: 3px solid black;
                 padding: 4px;
-                margin: 10px 0;
+                margin: 8px 0;
                 text-transform: uppercase;
             }
             table {
                 width: 100%;
                 border-collapse: collapse;
-                margin-bottom: 10px;
-                font-size: 14px; 
+                margin-bottom: 8px;
+                font-size: 16px; 
                 text-align: left; 
             }
             th {
                 text-align: left;
-                border-bottom: 1px solid black;
+                border-bottom: 2px solid black;
                 padding-bottom: 2px;
-                font-size: 14px;
+                font-size: 16px;
                 font-weight: 900;
             }
             td {
-                padding: 2px 0; /* Minimal vertical padding */
+                padding: 3px 0;
                 vertical-align: top;
             }
             .qty {
@@ -108,14 +108,14 @@ export const printOrder = (order: Order, settings: AppSettings) => {
                 text-align: right;
             }
             .total-line {
-                font-size: 20px; /* Reduced Total */
+                font-size: 24px; /* Clear Total */
                 font-weight: 900;
                 margin-top: 2px;
             }
             .footer {
                 text-align: center;
-                margin-top: 15px;
-                font-size: 12px;
+                margin-top: 10px;
+                font-size: 14px;
                 border-top: 1px solid black;
                 padding-top: 5px;
             }
@@ -123,8 +123,9 @@ export const printOrder = (order: Order, settings: AppSettings) => {
                 border-bottom: 1px dashed black;
                 margin-top: 15px;
                 text-align: center;
-                font-size: 10px;
+                font-size: 12px;
                 padding-bottom: 2px;
+                content: "✂";
             }
         </style>
     `;
