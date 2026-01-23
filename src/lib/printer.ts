@@ -24,111 +24,107 @@ export const printOrder = (order: Order, settings: AppSettings) => {
             }
             body {
                 font-family: 'Courier New', monospace;
-                width: 100%; /* Use full width of the viewport/paper */
+                width: 100%;
                 margin: 0;
                 padding: 5px;
-                box-sizing: border-box; /* Ensure padding is included in width */
+                box-sizing: border-box;
                 color: black;
                 background: white;
-                font-size: 20px; /* Even bigger as requested */
-                line-height: 1.2;
-                text-align: center; /* Center everything by default */
+                font-size: 14px; /* Standard receipt size */
+                line-height: 1.1; /* Tighter line height */
+                text-align: center;
             }
             .header {
                 text-align: center;
-                margin-bottom: 20px;
-                border-bottom: 3px dashed black;
-                padding-bottom: 15px;
+                margin-bottom: 5px; /* Reduced specific spacing */
+                border-bottom: 2px solid black;
+                padding-bottom: 5px;
             }
             .header h1 {
-                font-size: 40px; /* Bigger title */
+                font-size: 20px; /* Reduced title */
                 margin: 0;
                 text-transform: uppercase;
                 font-weight: 900;
-                line-height: 1.1;
             }
             .header p {
-                margin: 5px 0 0 0;
-                font-size: 18px; 
+                margin: 2px 0 0 0;
+                font-size: 12px; 
             }
             .order-info {
                 text-align: left; 
-                margin-bottom: 20px;
-                font-size: 20px;
+                margin-bottom: 10px;
+                font-size: 14px;
             }
             .order-info strong {
                 font-weight: 900;
-                font-size: 24px;
+                font-size: 16px;
                 display: block;
-                margin-bottom: 8px;
+                margin-bottom: 2px;
             }
             .type-badge {
                 text-align: center;
-                font-size: 32px; /* Huge Badge */
+                font-size: 18px; /* Compact Badge */
                 font-weight: 900;
-                border: 4px solid black;
-                padding: 10px;
-                margin: 20px 0;
+                border: 2px solid black;
+                padding: 4px;
+                margin: 10px 0;
                 text-transform: uppercase;
             }
             table {
                 width: 100%;
                 border-collapse: collapse;
-                margin-bottom: 20px;
-                font-size: 20px; 
+                margin-bottom: 10px;
+                font-size: 14px; 
                 text-align: left; 
             }
             th {
                 text-align: left;
-                border-bottom: 3px solid black;
-                padding-bottom: 8px;
-                font-size: 20px;
+                border-bottom: 1px solid black;
+                padding-bottom: 2px;
+                font-size: 14px;
                 font-weight: 900;
             }
             td {
-                padding: 10px 0;
+                padding: 2px 0; /* Minimal vertical padding */
                 vertical-align: top;
             }
             .qty {
                 width: 15%;
                 font-weight: 900;
-                font-size: 22px;
             }
             .item {
-                width: 50%;
+                width: 55%;
                 font-weight: bold;
             }
             .price {
-                width: 35%;
+                width: 30%;
                 text-align: right;
                 font-weight: 900;
-                font-size: 22px;
             }
             .total-section {
-                border-top: 4px dashed black;
-                padding-top: 15px;
-                margin-top: 15px;
+                border-top: 2px dashed black;
+                padding-top: 5px;
+                margin-top: 5px;
                 text-align: right;
             }
             .total-line {
-                font-size: 36px; /* Massive Total */
+                font-size: 20px; /* Reduced Total */
                 font-weight: 900;
-                margin-top: 5px;
+                margin-top: 2px;
             }
             .footer {
                 text-align: center;
-                margin-top: 40px;
-                font-size: 18px;
-                border-top: 3px solid black;
-                padding-top: 15px;
-                font-weight: bold;
+                margin-top: 15px;
+                font-size: 12px;
+                border-top: 1px solid black;
+                padding-top: 5px;
             }
             .cut-line {
-                border-bottom: 2px dashed black;
-                margin-top: 40px;
+                border-bottom: 1px dashed black;
+                margin-top: 15px;
                 text-align: center;
-                font-size: 14px;
-                padding-bottom: 5px;
+                font-size: 10px;
+                padding-bottom: 2px;
             }
         </style>
     `;
